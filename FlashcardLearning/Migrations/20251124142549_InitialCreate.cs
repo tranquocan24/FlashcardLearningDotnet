@@ -1,0 +1,141 @@
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace FlashcardLearning.Migrations
+{
+    /// <inheritdoc />
+    public partial class InitialCreate : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Username = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Role = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AvatarUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Desks",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsPublic = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Desks", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Desks_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Flashcards",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Term = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Definition = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Example = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DeckId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DeskId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Flashcards", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Flashcards_Desks_DeckId",
+                        column: x => x.DeckId,
+                        principalTable: "Desks",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "StudySessions",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DateStudied = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Score = table.Column<int>(type: "int", nullable: false),
+                    TotalCards = table.Column<int>(type: "int", nullable: false),
+                    Mode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DeckId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StudySessions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_StudySessions_Desks_DeckId",
+                        column: x => x.DeckId,
+                        principalTable: "Desks",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_StudySessions_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Desks_UserId",
+                table: "Desks",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Flashcards_DeckId",
+                table: "Flashcards",
+                column: "DeckId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StudySessions_DeckId",
+                table: "StudySessions",
+                column: "DeckId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StudySessions_UserId",
+                table: "StudySessions",
+                column: "UserId");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "Flashcards");
+
+            migrationBuilder.DropTable(
+                name: "StudySessions");
+
+            migrationBuilder.DropTable(
+                name: "Desks");
+
+            migrationBuilder.DropTable(
+                name: "Users");
+        }
+    }
+}

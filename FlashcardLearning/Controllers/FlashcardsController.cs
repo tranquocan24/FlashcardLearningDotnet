@@ -1,8 +1,10 @@
 ﻿using FlashcardLearning.Constants;
 using FlashcardLearning.Models;
+using FlashcardLearning.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.Design;
 using System.Security.Claims;
 
 namespace FlashcardLearning.Controllers
@@ -13,10 +15,12 @@ namespace FlashcardLearning.Controllers
     public class FlashcardsController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly DictionaryService _dictionaryService;
 
-        public FlashcardsController(AppDbContext context)
+        public FlashcardsController(AppDbContext context, DictionaryService dictionaryService)
         {
             _context = context;
+            _dictionaryService = dictionaryService; 
         }
 
         [HttpGet("{id}")]
@@ -45,6 +49,7 @@ namespace FlashcardLearning.Controllers
         [HttpPost]
         public async Task<ActionResult<Flashcard>> CreateFlashcard(Flashcard flashcard)
         {
+            // --- PHẦN 1: KIỂM TRA DECK VÀ QUYỀN (Giữ nguyên code của bạn) ---
             var deck = await _context.Decks.FindAsync(flashcard.DeckId);
             if (deck == null)
             {
@@ -54,19 +59,35 @@ namespace FlashcardLearning.Controllers
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var currentUserRole = User.FindFirstValue(ClaimTypes.Role);
 
-            if (deck.UserId.ToString() != currentUserId && currentUserRole != UserRoles.Admin)
+            // Lưu ý: Đảm bảo deck.UserId không null trước khi ToString() để tránh lỗi
+            if (deck.UserId?.ToString() != currentUserId && currentUserRole != UserRoles.Admin)
             {
                 return Forbid();
             }
 
+            // --- PHẦN 2: CHUẨN BỊ DỮ LIỆU ---
             flashcard.Id = Guid.NewGuid();
 
+            // Xử lý null cho các trường string (Giữ nguyên code của bạn)
             if (string.IsNullOrEmpty(flashcard.Example)) flashcard.Example = "";
             if (string.IsNullOrEmpty(flashcard.ImageUrl)) flashcard.ImageUrl = "";
 
+            // --- PHẦN 3: TỰ ĐỘNG LẤY AUDIO (Code mới thêm vào) ---
+            // Chỉ gọi API nếu client chưa gửi link Audio lên
+            if (string.IsNullOrEmpty(flashcard.AudioUrl))
+            {
+                // Gọi service lấy link mp3 từ từ điển
+                string? autoAudioUrl = await _dictionaryService.GetAudioUrlAsync(flashcard.Term);
+
+                // Nếu tìm thấy thì gán vào, không thấy thì để rỗng hoặc null
+                flashcard.AudioUrl = autoAudioUrl ?? "";
+            }
+
+            // --- PHẦN 4: LƯU VÀO DATABASE ---
             _context.Flashcards.Add(flashcard);
             await _context.SaveChangesAsync();
 
+            // Trả về kết quả
             return CreatedAtAction(nameof(GetFlashcard), new { id = flashcard.Id }, flashcard);
         }
 

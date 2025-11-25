@@ -24,5 +24,7 @@ namespace FlashcardLearning.Models
         [JsonIgnore]
         [ForeignKey("DeskId")]
         public Deck? Deck { get; set; }
+
+        public string? AudioUrl { get; set; }
     }
 }

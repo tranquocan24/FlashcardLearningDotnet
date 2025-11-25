@@ -59,6 +59,9 @@ namespace FlashcardLearning.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("AudioUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid>("DeckId")
                         .HasColumnType("uniqueidentifier");
 

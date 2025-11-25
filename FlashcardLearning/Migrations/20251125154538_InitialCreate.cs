@@ -60,6 +60,7 @@ namespace FlashcardLearning.Migrations
                     Example = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DeckId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AudioUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DeskId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>

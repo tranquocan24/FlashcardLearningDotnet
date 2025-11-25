@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Testing - Flashcard Learning</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div style="max-width: 1400px; margin: 0 auto; padding: 20px;">
+        <div class="page-header">
+            <h1>?? API Testing Dashboard</h1>
+            <div>
+                <a href="/" class="btn btn-primary">? V? trang chính</a>
+            </div>
+        </div>
+
+        <!-- Authentication Section -->
+        <div class="card">
+            <div class="card-header">
+                <h3>?? 1. Authentication APIs</h3>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <!-- Register -->
+                <div>
+                    <h4>Register</h4>
+                    <div class="form-group">
+                        <input type="text" id="regUsername" placeholder="Username">
+                    </div>
+                    <div class="form-group">
+                        <input type="email" id="regEmail" placeholder="Email">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="regPassword" placeholder="Password">
+                    </div>
+                    <button class="btn btn-success btn-full" onclick="testRegister()">POST /api/Auth/register</button>
+                </div>
+                
+                <!-- Login -->
+                <div>
+                    <h4>Login</h4>
+                    <div class="form-group">
+                        <input type="email" id="loginEmail" placeholder="Email">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="loginPassword" placeholder="Password">
+                    </div>
+                    <button class="btn btn-primary btn-full" onclick="testLogin()">POST /api/Auth/login</button>
+                    <div id="tokenDisplay" class="mt-2"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Decks Section -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h3>?? 2. Decks APIs</h3>
+                <span class="badge badge-private">Requires Auth</span>
+            </div>
+            
+            <div class="btn-group mb-2">
+                <button class="btn btn-primary" onclick="testGetDecks()">GET /api/Decks</button>
+                <button class="btn btn-primary" onclick="testGetDeck()">GET /api/Decks/{id}</button>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <h4>Create Deck</h4>
+                    <div class="form-group">
+                        <input type="text" id="deckTitle" placeholder="Deck Title">
+                    </div>
+                    <div class="form-group">
+                        <textarea id="deckDesc" placeholder="Description"></textarea>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="deckPublic">
+                        <label>Is Public</label>
+                    </div>
+                    <button class="btn btn-success btn-full mt-2" onclick="testCreateDeck()">POST /api/Decks</button>
+                </div>
+                
+                <div>
+                    <h4>Update/Delete Deck</h4>
+                    <div class="form-group">
+                        <input type="text" id="deckIdForUpdate" placeholder="Deck ID">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="deckTitleUpdate" placeholder="New Title">
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="deckPublicUpdate">
+                        <label>Is Public</label>
+                    </div>
+                    <button class="btn btn-warning btn-full mt-2" onclick="testUpdateDeck()">PUT /api/Decks/{id}</button>
+                    <button class="btn btn-danger btn-full mt-1" onclick="testDeleteDeck()">DELETE /api/Decks/{id}</button>
+                </div>
+            </div>
+            
+            <div id="decksResult" class="mt-2"></div>
+        </div>
+
+        <!-- Flashcards Section -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h3>?? 3. Flashcards APIs</h3>
+                <span class="badge badge-private">Requires Auth</span>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <h4>Create Flashcard</h4>
+                    <div class="form-group">
+                        <input type="text" id="cardDeckId" placeholder="Deck ID">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="cardTerm" placeholder="Term (e.g., Hello)">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="cardDef" placeholder="Definition">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="cardExample" placeholder="Example (optional)">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="cardImage" placeholder="Image URL (optional)">
+                    </div>
+                    <button class="btn btn-success btn-full" onclick="testCreateFlashcard()">POST /api/Flashcards</button>
+                    <div class="alert alert-info mt-2">
+                        <small>?? Audio URL s? t? ??ng ???c t?o t? Term</small>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4>Get/Update/Delete Flashcard</h4>
+                    <div class="form-group">
+                        <input type="text" id="cardId" placeholder="Flashcard ID">
+                    </div>
+                    <button class="btn btn-primary btn-full" onclick="testGetFlashcard()">GET /api/Flashcards/{id}</button>
+                    
+                    <hr style="margin: 20px 0;">
+                    
+                    <div class="form-group">
+                        <input type="text" id="cardIdUpdate" placeholder="Flashcard ID">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="cardTermUpdate" placeholder="New Term">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="cardDefUpdate" placeholder="New Definition">
+                    </div>
+                    <button class="btn btn-warning btn-full mt-2" onclick="testUpdateFlashcard()">PUT /api/Flashcards/{id}</button>
+                    <button class="btn btn-danger btn-full mt-1" onclick="testDeleteFlashcard()">DELETE /api/Flashcards/{id}</button>
+                </div>
+            </div>
+            
+            <div id="flashcardsResult" class="mt-2"></div>
+        </div>
+
+        <!-- Study Sessions Section -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h3>?? 4. Study Sessions APIs</h3>
+                <span class="badge badge-private">Requires Auth</span>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                <div>
+                    <h4>Create Session</h4>
+                    <div class="form-group">
+                        <input type="text" id="sessionDeckId" placeholder="Deck ID">
+                    </div>
+                    <div class="form-group">
+                        <select id="sessionMode">
+                            <option value="Flashcard">Flashcard</option>
+                            <option value="Quiz">Quiz</option>
+                            <option value="Match">Match</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="number" id="sessionScore" placeholder="Score">
+                    </div>
+                    <div class="form-group">
+                        <input type="number" id="sessionTotal" placeholder="Total Cards">
+                    </div>
+                    <button class="btn btn-success btn-full" onclick="testCreateSession()">POST /api/StudySessions</button>
+                </div>
+                
+                <div>
+                    <h4>Get My History</h4>
+                    <button class="btn btn-primary btn-full" onclick="testGetHistory()">GET /api/StudySessions/history</button>
+                </div>
+                
+                <div>
+                    <h4>Get Leaderboard</h4>
+                    <div class="form-group">
+                        <input type="text" id="leaderboardDeckId" placeholder="Deck ID">
+                    </div>
+                    <button class="btn btn-primary btn-full" onclick="testGetLeaderboard()">GET /api/StudySessions/leaderboard/{deckId}</button>
+                </div>
+            </div>
+            
+            <div id="sessionsResult" class="mt-2"></div>
+        </div>
+
+        <!-- Users Section -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h3>?? 5. Users APIs</h3>
+                <span class="badge badge-private">Requires Auth</span>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+                <div>
+                    <h4>Get Profile</h4>
+                    <button class="btn btn-primary btn-full" onclick="testGetProfile()">GET /api/Users/profile</button>
+                </div>
+                
+                <div>
+                    <h4>Update Profile</h4>
+                    <div class="form-group">
+                        <input type="text" id="profileUsername" placeholder="New Username">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="profileAvatar" placeholder="Avatar URL">
+                    </div>
+                    <button class="btn btn-warning btn-full" onclick="testUpdateProfile()">PUT /api/Users/profile</button>
+                </div>
+                
+                <div>
+                    <h4>Change Password</h4>
+                    <div class="form-group">
+                        <input type="password" id="oldPass" placeholder="Old Password">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="newPass" placeholder="New Password">
+                    </div>
+                    <button class="btn btn-warning btn-full" onclick="testChangePassword()">PUT /api/Users/change-password</button>
+                </div>
+            </div>
+            
+            <div id="usersResult" class="mt-2"></div>
+        </div>
+
+        <!-- Admin Section -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h3>?? 6. Admin APIs</h3>
+                <span class="badge badge-private">Admin Only</span>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                <div>
+                    <h4>Get All Users</h4>
+                    <button class="btn btn-primary btn-full" onclick="testGetAllUsers()">GET /api/Users</button>
+                </div>
+                
+                <div>
+                    <h4>Delete User</h4>
+                    <div class="form-group">
+                        <input type="text" id="deleteUserId" placeholder="User ID">
+                    </div>
+                    <button class="btn btn-danger btn-full" onclick="testDeleteUser()">DELETE /api/Users/{id}</button>
+                </div>
+                
+                <div>
+                    <h4>Get All Sessions</h4>
+                    <button class="btn btn-primary btn-full" onclick="testGetAllSessions()">GET /api/StudySessions/admin/all-history</button>
+                </div>
+            </div>
+            
+            <div id="adminResult" class="mt-2"></div>
+        </div>
+
+        <!-- Response Display -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h3>?? API Response</h3>
+                <button class="btn btn-sm btn-secondary" onclick="clearResponse()">Clear</button>
+            </div>
+            <pre id="responseArea" style="background: #f8f9fa; padding: 20px; border-radius: 6px; overflow-x: auto; max-height: 400px;">
+Ch? response t? API...
+            </pre>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = '/api';
+        let currentToken = localStorage.getItem('token') || '';
+
+        function updateTokenDisplay() {
+            const display = document.getElementById('tokenDisplay');
+            if (currentToken) {
+                display.innerHTML = `<div class="alert alert-success">
+                    <small>Token: ${currentToken.substring(0, 30)}...</small>
+                </div>`;
+            }
+        }
+
+        updateTokenDisplay();
+
+        function displayResponse(data, status = 'success') {
+            const area = document.getElementById('responseArea');
+            area.textContent = JSON.stringify(data, null, 2);
+            area.style.color = status === 'error' ? '#dc3545' : '#155724';
+        }
+
+        function clearResponse() {
+            document.getElementById('responseArea').textContent = 'Ch? response t? API...';
+        }
+
+        async function apiRequest(endpoint, options = {}) {
+            try {
+                const config = {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(currentToken && { 'Authorization': `Bearer ${currentToken}` })
+                    },
+                    ...options
+                };
+
+                console.log('Request:', endpoint, config);
+                const response = await fetch(API_URL + endpoint, config);
+                
+                let data;
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    data = await response.json();
+                } else {
+                    data = { status: response.status, message: 'No JSON response' };
+                }
+
+                if (!response.ok) {
+                    displayResponse({ error: data, status: response.status }, 'error');
+                    alert('Error: ' + (data.message || data.title || 'API Error'));
+                    return null;
+                }
+
+                displayResponse(data);
+                return data;
+            } catch (error) {
+                console.error('API Error:', error);
+                displayResponse({ error: error.message }, 'error');
+                alert('Error: ' + error.message);
+                return null;
+            }
+        }
+
+        // ==================== AUTH ====================
+        async function testRegister() {
+            const data = await apiRequest('/Auth/register', {
+                method: 'POST',
+                body: JSON.stringify({
+                    username: document.getElementById('regUsername').value,
+                    email: document.getElementById('regEmail').value,
+                    password: document.getElementById('regPassword').value
+                })
+            });
+        }
+
+        async function testLogin() {
+            const data = await apiRequest('/Auth/login', {
+                method: 'POST',
+                body: JSON.stringify({
+                    email: document.getElementById('loginEmail').value,
+                    password: document.getElementById('loginPassword').value
+                })
+            });
+            
+            if (data && data.token) {
+                currentToken = data.token;
+                localStorage.setItem('token', data.token);
+                updateTokenDisplay();
+                alert('? Login successful! Token saved.');
+            }
+        }
+
+        // ==================== DECKS ====================
+        async function testGetDecks() {
+            await apiRequest('/Decks');
+        }
+
+        async function testGetDeck() {
+            const id = prompt('Enter Deck ID:');
+            if (id) await apiRequest(`/Decks/${id}`);
+        }
+
+        async function testCreateDeck() {
+            const data = await apiRequest('/Decks', {
+                method: 'POST',
+                body: JSON.stringify({
+                    title: document.getElementById('deckTitle').value,
+                    description: document.getElementById('deckDesc').value,
+                    isPublic: document.getElementById('deckPublic').checked
+                })
+            });
+        }
+
+        async function testUpdateDeck() {
+            const id = document.getElementById('deckIdForUpdate').value;
+            const data = await apiRequest(`/Decks/${id}`, {
+                method: 'PUT',
+                body: JSON.stringify({
+                    id: id,
+                    title: document.getElementById('deckTitleUpdate').value,
+                    description: '',
+                    isPublic: document.getElementById('deckPublicUpdate').checked
+                })
+            });
+        }
+
+        async function testDeleteDeck() {
+            const id = document.getElementById('deckIdForUpdate').value;
+            if (confirm('Delete deck ' + id + '?')) {
+                await apiRequest(`/Decks/${id}`, { method: 'DELETE' });
+            }
+        }
+
+        // ==================== FLASHCARDS ====================
+        async function testGetFlashcard() {
+            const id = document.getElementById('cardId').value;
+            if (id) await apiRequest(`/Flashcards/${id}`);
+        }
+
+        async function testCreateFlashcard() {
+            const data = await apiRequest('/Flashcards', {
+                method: 'POST',
+                body: JSON.stringify({
+                    deckId: document.getElementById('cardDeckId').value,
+                    term: document.getElementById('cardTerm').value,
+                    definition: document.getElementById('cardDef').value,
+                    example: document.getElementById('cardExample').value,
+                    imageUrl: document.getElementById('cardImage').value
+                })
+            });
+            
+            if (data) {
+                alert('? Flashcard created! Check if AudioUrl is auto-generated.');
+            }
+        }
+
+        async function testUpdateFlashcard() {
+            const id = document.getElementById('cardIdUpdate').value;
+            const deckId = prompt('Enter Deck ID for this flashcard:');
+            
+            const data = await apiRequest(`/Flashcards/${id}`, {
+                method: 'PUT',
+                body: JSON.stringify({
+                    id: id,
+                    deckId: deckId,
+                    term: document.getElementById('cardTermUpdate').value,
+                    definition: document.getElementById('cardDefUpdate').value,
+                    example: '',
+                    imageUrl: ''
+                })
+            });
+        }
+
+        async function testDeleteFlashcard() {
+            const id = document.getElementById('cardIdUpdate').value;
+            if (confirm('Delete flashcard ' + id + '?')) {
+                await apiRequest(`/Flashcards/${id}`, { method: 'DELETE' });
+            }
+        }
+
+        // ==================== STUDY SESSIONS ====================
+        async function testCreateSession() {
+            const data = await apiRequest('/StudySessions', {
+                method: 'POST',
+                body: JSON.stringify({
+                    deckId: document.getElementById('sessionDeckId').value,
+                    mode: document.getElementById('sessionMode').value,
+                    score: parseInt(document.getElementById('sessionScore').value),
+                    totalCards: parseInt(document.getElementById('sessionTotal').value)
+                })
+            });
+        }
+
+        async function testGetHistory() {
+            await apiRequest('/StudySessions/history');
+        }
+
+        async function testGetLeaderboard() {
+            const id = document.getElementById('leaderboardDeckId').value;
+            if (id) await apiRequest(`/StudySessions/leaderboard/${id}`);
+        }
+
+        // ==================== USERS ====================
+        async function testGetProfile() {
+            await apiRequest('/Users/profile');
+        }
+
+        async function testUpdateProfile() {
+            const data = await apiRequest('/Users/profile', {
+                method: 'PUT',
+                body: JSON.stringify({
+                    username: document.getElementById('profileUsername').value,
+                    avatarUrl: document.getElementById('profileAvatar').value
+                })
+            });
+        }
+
+        async function testChangePassword() {
+            const data = await apiRequest('/Users/change-password', {
+                method: 'PUT',
+                body: JSON.stringify({
+                    oldPassword: document.getElementById('oldPass').value,
+                    newPassword: document.getElementById('newPass').value
+                })
+            });
+        }
+
+        // ==================== ADMIN ====================
+        async function testGetAllUsers() {
+            await apiRequest('/Users');
+        }
+
+        async function testDeleteUser() {
+            const id = document.getElementById('deleteUserId').value;
+            if (id && confirm('Delete user ' + id + '?')) {
+                await apiRequest(`/Users/${id}`, { method: 'DELETE' });
+            }
+        }
+
+        async function testGetAllSessions() {
+            await apiRequest('/StudySessions/admin/all-history');
+        }
+    </script>
+</body>
+</html>

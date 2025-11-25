@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FlashcardLearning.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251125134444_InitialCreate")]
+    [Migration("20251125154538_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -61,6 +61,9 @@ namespace FlashcardLearning.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AudioUrl")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("DeckId")
                         .HasColumnType("uniqueidentifier");

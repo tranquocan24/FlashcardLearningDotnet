@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome - Flashcard Learning App</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .welcome-container {
+            max-width: 1200px;
+            width: 90%;
+            padding: 40px;
+        }
+        
+        .welcome-header {
+            text-align: center;
+            color: white;
+            margin-bottom: 50px;
+        }
+        
+        .welcome-header h1 {
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .welcome-header p {
+            font-size: 1.3rem;
+            opacity: 0.95;
+        }
+        
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .welcome-card {
+            background: white;
+            border-radius: 16px;
+            padding: 35px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        
+        .welcome-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+        
+        .welcome-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+        
+        .welcome-card h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .welcome-card p {
+            color: #6c757d;
+            line-height: 1.6;
+        }
+        
+        .primary-card {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #4257b2 0%, #667eea 100%);
+            color: white;
+        }
+        
+        .primary-card h2,
+        .primary-card p {
+            color: white;
+        }
+        
+        .footer-links {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 1rem;
+            opacity: 0.9;
+            transition: opacity 0.2s;
+        }
+        
+        .footer-links a:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="welcome-container">
+        <div class="welcome-header">
+            <h1>?? Flashcard Learning</h1>
+            <p>N?n t?ng h?c t? v?ng thông minh v?i AI Auto-Audio</p>
+        </div>
+
+        <div class="cards-grid">
+            <!-- Primary CTA -->
+            <a href="/index.html" class="welcome-card primary-card">
+                <span class="welcome-icon">??</span>
+                <h2>Vào ?ng d?ng ngay</h2>
+                <p>B?t ??u h?c và qu?n lý flashcards c?a b?n</p>
+            </a>
+
+            <!-- Tutorial -->
+            <a href="/tutorial.html" class="welcome-card">
+                <span class="welcome-icon">??</span>
+                <h2>H??ng d?n t?ng b??c</h2>
+                <p>H?c cách s? d?ng ?ng d?ng trong 5 phút</p>
+            </a>
+
+            <!-- API Guide -->
+            <a href="/guide.html" class="welcome-card">
+                <span class="welcome-icon">??</span>
+                <h2>API Documentation</h2>
+                <p>Tài li?u ??y ?? v? t?t c? endpoints</p>
+            </a>
+
+            <!-- API Testing -->
+            <a href="/test-api.html" class="welcome-card">
+                <span class="welcome-icon">??</span>
+                <h2>API Testing Tool</h2>
+                <p>Test t?t c? API tr?c ti?p trên browser</p>
+            </a>
+
+            <!-- UI Demo -->
+            <a href="/demo.html" class="welcome-card">
+                <span class="welcome-icon">??</span>
+                <h2>UI Components</h2>
+                <p>Xem demo t?t c? components và styles</p>
+            </a>
+
+            <!-- Quick Start -->
+            <a href="/start.html" class="welcome-card">
+                <span class="welcome-icon">?</span>
+                <h2>Quick Start</h2>
+                <p>B?t ??u nhanh v?i ví d? m?u</p>
+            </a>
+        </div>
+
+        <!-- Features Overview -->
+        <div style="background: rgba(255,255,255,0.95); border-radius: 16px; padding: 35px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+            <h2 style="text-align: center; margin-bottom: 30px; color: #2c3e50;">? Tính n?ng chính</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px;">
+                <div style="text-align: center;">
+                    <div style="font-size: 2.5rem; margin-bottom: 10px;">??</div>
+                    <h3 style="color: #4257b2;">Auto Audio</h3>
+                    <p style="color: #6c757d;">T? ??ng t?o phát âm cho t? ti?ng Anh</p>
+                </div>
+                
+                <div style="text-align: center;">
+                    <div style="font-size: 2.5rem; margin-bottom: 10px;">??</div>
+                    <h3 style="color: #4257b2;">3 Game Modes</h3>
+                    <p style="color: #6c757d;">Flashcard, Quiz, Match Game</p>
+                </div>
+                
+                <div style="text-align: center;">
+                    <div style="font-size: 2.5rem; margin-bottom: 10px;">??</div>
+                    <h3 style="color: #4257b2;">Leaderboard</h3>
+                    <p style="color: #6c757d;">Thi ?ua v?i b?n bè</p>
+                </div>
+                
+                <div style="text-align: center;">
+                    <div style="font-size: 2.5rem; margin-bottom: 10px;">??</div>
+                    <h3 style="color: #4257b2;">Progress Tracking</h3>
+                    <p style="color: #6c757d;">Theo dõi ti?n ?? chi ti?t</p>
+                </div>
+                
+                <div style="text-align: center;">
+                    <div style="font-size: 2.5rem; margin-bottom: 10px;">??</div>
+                    <h3 style="color: #4257b2;">Public Sharing</h3>
+                    <p style="color: #6c757d;">Chia s? v?i c?ng ??ng</p>
+                </div>
+                
+                <div style="text-align: center;">
+                    <div style="font-size: 2.5rem; margin-bottom: 10px;">??</div>
+                    <h3 style="color: #4257b2;">Secure</h3>
+                    <p style="color: #6c757d;">JWT Auth & Role-based</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div style="background: rgba(255,255,255,0.95); border-radius: 16px; padding: 35px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+            <h2 style="text-align: center; margin-bottom: 25px; color: #2c3e50;">?? Tech Stack</h2>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                <div>
+                    <h3 style="color: #4257b2; margin-bottom: 15px;">Backend</h3>
+                    <ul style="line-height: 2; color: #555;">
+                        <li>? ASP.NET Core 8.0</li>
+                        <li>??? Entity Framework Core</li>
+                        <li>?? SQL Server</li>
+                        <li>?? JWT Authentication</li>
+                        <li>?? BCrypt Password Hash</li>
+                        <li>?? Free Dictionary API</li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 style="color: #4257b2; margin-bottom: 15px;">Frontend</h3>
+                    <ul style="line-height: 2; color: #555;">
+                        <li>?? Pure HTML5</li>
+                        <li>?? Pure CSS3</li>
+                        <li>? Vanilla JavaScript</li>
+                        <li>?? Fetch API</li>
+                        <li>?? Custom SPA Router</li>
+                        <li>?? Web Audio API</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer-links">
+            <p style="color: white; margin-bottom: 15px; font-size: 1.1rem;">
+                ?? Flashcard Learning - Made with ??
+            </p>
+            <div>
+                <a href="https://github.com/tranquocan24/FlashcardLearningDotnet" target="_blank">GitHub</a>
+                <span style="color: rgba(255,255,255,0.5);">|</span>
+                <a href="/guide.html">API Docs</a>
+                <span style="color: rgba(255,255,255,0.5);">|</span>
+                <a href="/tutorial.html">Tutorial</a>
+                <span style="color: rgba(255,255,255,0.5);">|</span>
+                <a href="/test-api.html">Testing</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple redirect after 3 seconds if user doesn't click
+        // setTimeout(() => {
+        //     if (confirm('T? ??ng chuy?n ??n ?ng d?ng?')) {
+        //         window.location.href = '/index.html';
+        //     }
+        // }, 3000);
+    </script>
+</body>
+</html>

@@ -43,7 +43,7 @@ builder.Services.AddSwaggerGen(options =>
 
     options.OperationFilter<SecurityRequirementsOperationFilter>();
 });
-
+builder.Services.AddHttpClient<FlashcardLearning.Services.DictionaryService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

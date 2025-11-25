@@ -50,7 +50,7 @@ namespace FlashcardLearning.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Desks");
+                    b.ToTable("Decks");
                 });
 
             modelBuilder.Entity("FlashcardLearning.Models.Flashcard", b =>
@@ -136,7 +136,7 @@ namespace FlashcardLearning.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PasswordHash")
+                    b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

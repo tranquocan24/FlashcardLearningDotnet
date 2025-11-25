@@ -18,7 +18,7 @@ namespace FlashcardLearning.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Username = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Role = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     AvatarUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
@@ -29,7 +29,7 @@ namespace FlashcardLearning.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Desks",
+                name: "Decks",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -41,9 +41,9 @@ namespace FlashcardLearning.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Desks", x => x.Id);
+                    table.PrimaryKey("PK_Decks", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Desks_Users_UserId",
+                        name: "FK_Decks_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
@@ -66,9 +66,9 @@ namespace FlashcardLearning.Migrations
                 {
                     table.PrimaryKey("PK_Flashcards", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Flashcards_Desks_DeckId",
+                        name: "FK_Flashcards_Decks_DeckId",
                         column: x => x.DeckId,
-                        principalTable: "Desks",
+                        principalTable: "Decks",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -89,9 +89,9 @@ namespace FlashcardLearning.Migrations
                 {
                     table.PrimaryKey("PK_StudySessions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_StudySessions_Desks_DeckId",
+                        name: "FK_StudySessions_Decks_DeckId",
                         column: x => x.DeckId,
-                        principalTable: "Desks",
+                        principalTable: "Decks",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -102,8 +102,8 @@ namespace FlashcardLearning.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Desks_UserId",
-                table: "Desks",
+                name: "IX_Decks_UserId",
+                table: "Decks",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
@@ -132,7 +132,7 @@ namespace FlashcardLearning.Migrations
                 name: "StudySessions");
 
             migrationBuilder.DropTable(
-                name: "Desks");
+                name: "Decks");
 
             migrationBuilder.DropTable(
                 name: "Users");

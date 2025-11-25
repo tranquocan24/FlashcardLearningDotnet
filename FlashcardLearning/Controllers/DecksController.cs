@@ -42,15 +42,6 @@ namespace FlashcardLearning.Controllers
             deck.Id = Guid.NewGuid();
             deck.CreatedAt = DateTime.Now;
 
-            if (deck.Flashcards != null)
-            {
-                foreach (var card in deck.Flashcards)
-                {
-                    card.Id = Guid.NewGuid();
-                    card.DeckId = deck.Id;
-                }
-            }
-
             _context.Decks.Add(deck);
             await _context.SaveChangesAsync();
 

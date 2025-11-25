@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FlashcardLearning.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251124142549_InitialCreate")]
+    [Migration("20251125134444_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -53,7 +53,7 @@ namespace FlashcardLearning.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Desks");
+                    b.ToTable("Decks");
                 });
 
             modelBuilder.Entity("FlashcardLearning.Models.Flashcard", b =>
@@ -139,7 +139,7 @@ namespace FlashcardLearning.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PasswordHash")
+                    b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

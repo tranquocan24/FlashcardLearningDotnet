@@ -21,7 +21,7 @@ namespace FlashcardLearning.Models
         [ForeignKey("UserId")]
         public User? User { get; set; }
 
-        // FK: Desk
+        // FK: Deck
         public Guid DeckId { get; set; }
         [ForeignKey("DeckId")]
         public Deck? Deck { get; set; }

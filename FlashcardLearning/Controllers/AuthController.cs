@@ -39,7 +39,7 @@ namespace FlashcardLearning.Controllers
                 Id = Guid.NewGuid(),
                 Username = request.Username,
                 Email = request.Email,
-                PasswordHash = passwordHash,
+                Password = passwordHash,
                 Role = UserRoles.User
             };
 
@@ -58,7 +58,7 @@ namespace FlashcardLearning.Controllers
                 return BadRequest("Email or password is wrong");
             }
 
-            if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+            if (!BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
             {
                 return BadRequest("Email or password is wrong");
             }

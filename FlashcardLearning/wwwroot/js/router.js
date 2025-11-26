@@ -70,18 +70,18 @@ function renderLogin() {
     document.getElementById('app').innerHTML = `
         <div class="auth-container">
             <div class="auth-box">
-                <h2>?? ??ng Nh?p</h2>
+                <h2>Login</h2>
                 <div class="form-group">
                     <label>Email</label>
                     <input type="email" id="loginEmail" placeholder="example@email.com">
                 </div>
                 <div class="form-group">
-                    <label>M?t kh?u</label>
-                    <input type="password" id="loginPassword" placeholder="Nh?p m?t kh?u">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" placeholder="Enter password">
                 </div>
-                <button class="btn btn-primary btn-full" onclick="handleLogin()">??ng Nh?p</button>
+                <button class="btn btn-primary btn-full" onclick="handleLogin()">Login</button>
                 <p class="text-center mt-2">
-                    <a href="#/register" class="link">Ch?a có tài kho?n? ??ng ký ngay</a>
+                    <a href="#/register" class="link">Don't have an account? Register now</a>
                 </p>
             </div>
         </div>
@@ -92,22 +92,22 @@ function renderRegister() {
     document.getElementById('app').innerHTML = `
         <div class="auth-container">
             <div class="auth-box">
-                <h2>?? ??ng Ký</h2>
+                <h2>Register</h2>
                 <div class="form-group">
-                    <label>Tên ng??i dùng</label>
-                    <input type="text" id="registerUsername" placeholder="Tên c?a b?n">
+                    <label>Username</label>
+                    <input type="text" id="registerUsername" placeholder="Your name">
                 </div>
                 <div class="form-group">
                     <label>Email</label>
                     <input type="email" id="registerEmail" placeholder="example@email.com">
                 </div>
                 <div class="form-group">
-                    <label>M?t kh?u</label>
-                    <input type="password" id="registerPassword" placeholder="T?i thi?u 6 ký t?">
+                    <label>Password</label>
+                    <input type="password" id="registerPassword" placeholder="Minimum 6 characters">
                 </div>
-                <button class="btn btn-primary btn-full" onclick="handleRegister()">??ng Ký</button>
+                <button class="btn btn-primary btn-full" onclick="handleRegister()">Register</button>
                 <p class="text-center mt-2">
-                    <a href="#/login" class="link">?ã có tài kho?n? ??ng nh?p</a>
+                    <a href="#/login" class="link">Already have an account? Login</a>
                 </p>
             </div>
         </div>
@@ -119,7 +119,7 @@ async function handleLogin() {
     const password = document.getElementById('loginPassword').value;
     
     if (!email || !password) {
-        showAlert('Vui lòng ?i?n ??y ?? thông tin', 'error');
+        showAlert('Please fill in all fields', 'error');
         return;
     }
     
@@ -135,7 +135,7 @@ async function handleLogin() {
             username: data.username,
             role: data.role
         });
-        showAlert('??ng nh?p thành công!', 'success');
+        showAlert('Login successful!', 'success');
         navigate('/dashboard');
     }
 }
@@ -146,12 +146,12 @@ async function handleRegister() {
     const password = document.getElementById('registerPassword').value;
     
     if (!username || !email || !password) {
-        showAlert('Vui lòng ?i?n ??y ?? thông tin', 'error');
+        showAlert('Please fill in all fields', 'error');
         return;
     }
     
     if (password.length < 6) {
-        showAlert('M?t kh?u ph?i có ít nh?t 6 ký t?', 'error');
+        showAlert('Password must be at least 6 characters', 'error');
         return;
     }
     
@@ -161,7 +161,7 @@ async function handleRegister() {
     });
     
     if (data) {
-        showAlert('??ng ký thành công! Hãy ??ng nh?p.', 'success');
+        showAlert('Registration successful! Please login.', 'success');
         navigate('/login');
     }
 }
@@ -191,42 +191,42 @@ async function renderDashboard() {
     
     const content = `
         <div class="page-header">
-            <h1>?? Dashboard</h1>
+            <h1>Dashboard</h1>
         </div>
         
         <div class="stats-grid">
             <div class="stat-card">
                 <h3>${totalDecks}</h3>
-                <p>B? th? c?a tôi</p>
+                <p>My Decks</p>
             </div>
             <div class="stat-card success">
                 <h3>${totalCards}</h3>
-                <p>T?ng s? th?</p>
+                <p>Total Cards</p>
             </div>
             <div class="stat-card warning">
                 <h3>${totalSessions}</h3>
-                <p>L??t h?c</p>
+                <p>Study Sessions</p>
             </div>
             <div class="stat-card danger">
                 <h3>${avgScore}%</h3>
-                <p>?i?m trung bình</p>
+                <p>Average Score</p>
             </div>
         </div>
         
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">?? L?ch s? h?c g?n ?ây</h3>
+                <h3 class="card-title">Recent Study History</h3>
             </div>
             ${recentHistory.length === 0 ? 
-                renderEmptyState('??', 'Ch?a có l?ch s? h?c t?p', 'Hãy b?t ??u h?c m?t b? th?!') :
+                renderEmptyState('No study history yet', 'Start studying a deck!') :
                 `<div class="table-container">
                     <table>
                         <thead>
                             <tr>
-                                <th>B? th?</th>
-                                <th>Ch? ??</th>
-                                <th>?i?m s?</th>
-                                <th>Th?i gian</th>
+                                <th>Deck</th>
+                                <th>Mode</th>
+                                <th>Score</th>
+                                <th>Date</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -245,8 +245,8 @@ async function renderDashboard() {
         </div>
         
         <div class="btn-group">
-            <a href="#/decks" class="btn btn-primary">?? Xem t?t c? b? th?</a>
-            <a href="#/profile" class="btn btn-secondary">?? Xem h? s?</a>
+            <a href="#/decks" class="btn btn-primary">View All Decks</a>
+            <a href="#/profile" class="btn btn-secondary">View Profile</a>
         </div>
     `;
     
@@ -261,30 +261,30 @@ async function renderDecks() {
     
     const content = `
         <div class="page-header">
-            <h1>?? B? Th? C?a Tôi</h1>
-            <button class="btn btn-primary" onclick="showCreateDeckModal()">+ T?o B? Th? M?i</button>
+            <h1>My Decks</h1>
+            <button class="btn btn-primary" onclick="showCreateDeckModal()">+ Create New Deck</button>
         </div>
         
         ${!decks || decks.length === 0 ? 
-            renderEmptyState('??', 'Ch?a có b? th? nào', 'T?o b? th? ??u tiên ?? b?t ??u h?c!') :
+            renderEmptyState('No decks yet', 'Create your first deck to start learning!') :
             `<div class="deck-grid">
                 ${decks.map(deck => `
                     <div class="deck-item" onclick="navigate('/deck/${deck.id}')">
                         <h3>${deck.title}</h3>
-                        <p>${deck.description || 'Không có mô t?'}</p>
+                        <p>${deck.description || 'No description'}</p>
                         <div class="deck-meta">
                             <div>
                                 <span class="badge ${deck.isPublic ? 'badge-public' : 'badge-private'}">
-                                    ${deck.isPublic ? '?? Công khai' : '?? Riêng t?'}
+                                    ${deck.isPublic ? 'Public' : 'Private'}
                                 </span>
                                 <span class="text-muted" style="margin-left:10px;">
-                                    ${deck.flashcards?.length || 0} th?
+                                    ${deck.flashcards?.length || 0} cards
                                 </span>
                             </div>
                             <div class="deck-actions" onclick="event.stopPropagation()">
-                                <button class="btn btn-sm btn-primary" onclick="navigate('/study/${deck.id}')">?? H?c</button>
-                                <button class="btn btn-sm btn-secondary" onclick="showEditDeckModal('${deck.id}')">??</button>
-                                <button class="btn btn-sm btn-danger" onclick="deleteDeck('${deck.id}')">???</button>
+                                <button class="btn btn-sm btn-primary" onclick="navigate('/study/${deck.id}')">Study</button>
+                                <button class="btn btn-sm btn-secondary" onclick="showEditDeckModal('${deck.id}')">Edit</button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteDeck('${deck.id}')">Delete</button>
                             </div>
                         </div>
                     </div>
@@ -299,24 +299,24 @@ async function renderDecks() {
 function showCreateDeckModal() {
     const modalContent = `
         <div class="form-group">
-            <label>Tên b? th? *</label>
-            <input type="text" id="deckTitle" placeholder="VD: T? v?ng IELTS">
+            <label>Deck Name *</label>
+            <input type="text" id="deckTitle" placeholder="e.g. IELTS Vocabulary">
         </div>
         <div class="form-group">
-            <label>Mô t?</label>
-            <textarea id="deckDescription" placeholder="Mô t? ng?n v? b? th?..."></textarea>
+            <label>Description</label>
+            <textarea id="deckDescription" placeholder="Brief description of the deck..."></textarea>
         </div>
         <div class="form-group">
             <div class="checkbox-group">
                 <input type="checkbox" id="deckIsPublic">
-                <label>Công khai cho m?i ng??i</label>
+                <label>Make public for everyone</label>
             </div>
         </div>
     `;
     
-    openModal('T?o B? Th? M?i', modalContent, [
-        { text: 'H?y', class: 'btn-secondary', onclick: 'closeModal()' },
-        { text: 'T?o M?i', class: 'btn-primary', onclick: 'createDeck()' }
+    openModal('Create New Deck', modalContent, [
+        { text: 'Cancel', class: 'btn-secondary', onclick: 'closeModal()' },
+        { text: 'Create', class: 'btn-primary', onclick: 'createDeck()' }
     ]);
 }
 
@@ -326,24 +326,24 @@ async function showEditDeckModal(deckId) {
     
     const modalContent = `
         <div class="form-group">
-            <label>Tên b? th? *</label>
+            <label>Deck Name *</label>
             <input type="text" id="editDeckTitle" value="${deck.title}">
         </div>
         <div class="form-group">
-            <label>Mô t?</label>
+            <label>Description</label>
             <textarea id="editDeckDescription">${deck.description || ''}</textarea>
         </div>
         <div class="form-group">
             <div class="checkbox-group">
                 <input type="checkbox" id="editDeckIsPublic" ${deck.isPublic ? 'checked' : ''}>
-                <label>Công khai cho m?i ng??i</label>
+                <label>Make public for everyone</label>
             </div>
         </div>
     `;
     
-    openModal('Ch?nh S?a B? Th?', modalContent, [
-        { text: 'H?y', class: 'btn-secondary', onclick: 'closeModal()' },
-        { text: 'L?u', class: 'btn-primary', onclick: `updateDeck('${deckId}')` }
+    openModal('Edit Deck', modalContent, [
+        { text: 'Cancel', class: 'btn-secondary', onclick: 'closeModal()' },
+        { text: 'Save', class: 'btn-primary', onclick: `updateDeck('${deckId}')` }
     ]);
 }
 
@@ -353,7 +353,7 @@ async function createDeck() {
     const isPublic = document.getElementById('deckIsPublic').checked;
     
     if (!title) {
-        showAlert('Vui lòng nh?p tên b? th?', 'error');
+        showAlert('Please enter deck name', 'error');
         return;
     }
     
@@ -363,7 +363,7 @@ async function createDeck() {
     });
     
     if (data) {
-        showAlert('T?o b? th? thành công!', 'success');
+        showAlert('Deck created successfully!', 'success');
         closeModal();
         renderDecks();
     }
@@ -375,7 +375,7 @@ async function updateDeck(deckId) {
     const isPublic = document.getElementById('editDeckIsPublic').checked;
     
     if (!title) {
-        showAlert('Vui lòng nh?p tên b? th?', 'error');
+        showAlert('Please enter deck name', 'error');
         return;
     }
     
@@ -385,21 +385,21 @@ async function updateDeck(deckId) {
     });
     
     if (data) {
-        showAlert('C?p nh?t thành công!', 'success');
+        showAlert('Updated successfully!', 'success');
         closeModal();
         renderDecks();
     }
 }
 
 async function deleteDeck(deckId) {
-    if (!confirm('B?n có ch?c mu?n xóa b? th? này?')) return;
+    if (!confirm('Are you sure you want to delete this deck?')) return;
     
     const data = await apiCall(`/Decks/${deckId}`, {
         method: 'DELETE'
     });
     
     if (data) {
-        showAlert('Xóa b? th? thành công!', 'success');
+        showAlert('Deck deleted successfully!', 'success');
         renderDecks();
     }
 }
@@ -407,12 +407,16 @@ async function deleteDeck(deckId) {
 // ============================
 // DECK DETAIL PAGE
 // ============================
+let currentDeckId = null;
+
 async function renderDeckDetail(params) {
     const deckId = params.get('id');
     if (!deckId) {
         navigate('/decks');
         return;
     }
+    
+    currentDeckId = deckId;
     
     const deck = await apiCall(`/Decks/${deckId}`);
     if (!deck) {
@@ -425,37 +429,37 @@ async function renderDeckDetail(params) {
     const content = `
         <div class="page-header">
             <div>
-                <a href="#/decks" class="link">? Quay l?i</a>
-                <h1>?? ${deck.title}</h1>
-                <p class="text-muted">${deck.description || 'Không có mô t?'}</p>
+                <a href="#/decks" class="link">? Back</a>
+                <h1>${deck.title}</h1>
+                <p class="text-muted">${deck.description || 'No description'}</p>
             </div>
-            <button class="btn btn-success" onclick="navigate('/study/${deck.id}')">?? B?t ??u h?c</button>
+            <button class="btn btn-success" onclick="navigate('/study/${deck.id}')">Start Study</button>
         </div>
         
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">Flashcards (${cards.length})</h3>
-                <button class="btn btn-primary btn-sm" onclick="showCreateFlashcardModal('${deckId}')">+ Thêm Th?</button>
+                <button class="btn btn-primary btn-sm" onclick="showCreateFlashcardModal('${deckId}')">+ Add Card</button>
             </div>
             
             ${cards.length === 0 ? 
-                renderEmptyState('??', 'Ch?a có flashcard nào', 'Thêm flashcard ??u tiên ?? b?t ??u!') :
+                renderEmptyState('No flashcards yet', 'Add your first flashcard to get started!') :
                 `<div class="flashcard-list">
                     ${cards.map(card => `
                         <div class="flashcard-item">
-                            <div class="flashcard-term">?? ${card.term}</div>
+                            <div class="flashcard-term"><strong>${card.term}</strong></div>
                             <div class="flashcard-definition">${card.definition}</div>
-                            ${card.example ? `<div class="flashcard-example">?? ${card.example}</div>` : ''}
+                            ${card.example ? `<div class="flashcard-example"><em>${card.example}</em></div>` : ''}
                             ${card.imageUrl ? `<img src="${card.imageUrl}" class="flashcard-image" alt="${card.term}">` : ''}
                             ${card.audioUrl ? `
                                 <div class="audio-player">
-                                    <button onclick="playAudio('${card.audioUrl}')">?? Phát âm</button>
+                                    <button onclick="playAudio('${card.audioUrl}')">Play Audio</button>
                                     <span class="text-muted" style="font-size:0.8rem;">Auto-generated</span>
                                 </div>
                             ` : ''}
                             <div class="flashcard-actions">
-                                <button class="btn btn-sm btn-secondary" onclick="showEditFlashcardModal('${card.id}', '${deckId}')">?? S?a</button>
-                                <button class="btn btn-sm btn-danger" onclick="deleteFlashcard('${card.id}', '${deckId}')">??? Xóa</button>
+                                <button class="btn btn-sm btn-secondary" onclick="showEditFlashcardModal('${card.id}', '${deckId}')">Edit</button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteFlashcard('${card.id}', '${deckId}')">Delete</button>
                             </div>
                         </div>
                     `).join('')}
@@ -467,32 +471,40 @@ async function renderDeckDetail(params) {
     document.getElementById('app').innerHTML = renderLayout(content);
 }
 
+async function refreshDeckDetail() {
+    if (currentDeckId) {
+        const params = new URLSearchParams();
+        params.set('id', currentDeckId);
+        await renderDeckDetail(params);
+    }
+}
+
 function showCreateFlashcardModal(deckId) {
     const modalContent = `
         <div class="form-group">
-            <label>Term (Thu?t ng?) *</label>
-            <input type="text" id="cardTerm" placeholder="VD: Hello">
+            <label>Term *</label>
+            <input type="text" id="cardTerm" placeholder="e.g. Hello">
         </div>
         <div class="form-group">
-            <label>Definition (??nh ngh?a) *</label>
-            <input type="text" id="cardDefinition" placeholder="VD: Xin chào">
+            <label>Definition *</label>
+            <input type="text" id="cardDefinition" placeholder="e.g. A greeting">
         </div>
         <div class="form-group">
-            <label>Example (Ví d?)</label>
-            <input type="text" id="cardExample" placeholder="VD: Hello, how are you?">
+            <label>Example</label>
+            <input type="text" id="cardExample" placeholder="e.g. Hello, how are you?">
         </div>
         <div class="form-group">
             <label>Image URL</label>
             <input type="text" id="cardImageUrl" placeholder="https://example.com/image.jpg">
         </div>
         <div class="alert alert-info">
-            <small>?? Audio s? t? ??ng t?o t? Term n?u có trong t? ?i?n</small>
+            <small>Audio will be auto-generated from Term if available</small>
         </div>
     `;
     
-    openModal('Thêm Flashcard M?i', modalContent, [
-        { text: 'H?y', class: 'btn-secondary', onclick: 'closeModal()' },
-        { text: 'T?o', class: 'btn-primary', onclick: `createFlashcard('${deckId}')` }
+    openModal('Add New Flashcard', modalContent, [
+        { text: 'Cancel', class: 'btn-secondary', onclick: 'closeModal()' },
+        { text: 'Create', class: 'btn-primary', onclick: `createFlashcard('${deckId}')` }
     ]);
 }
 
@@ -502,15 +514,15 @@ async function showEditFlashcardModal(cardId, deckId) {
     
     const modalContent = `
         <div class="form-group">
-            <label>Term (Thu?t ng?) *</label>
+            <label>Term *</label>
             <input type="text" id="editCardTerm" value="${card.term}">
         </div>
         <div class="form-group">
-            <label>Definition (??nh ngh?a) *</label>
+            <label>Definition *</label>
             <input type="text" id="editCardDefinition" value="${card.definition}">
         </div>
         <div class="form-group">
-            <label>Example (Ví d?)</label>
+            <label>Example</label>
             <input type="text" id="editCardExample" value="${card.example || ''}">
         </div>
         <div class="form-group">
@@ -519,9 +531,9 @@ async function showEditFlashcardModal(cardId, deckId) {
         </div>
     `;
     
-    openModal('Ch?nh S?a Flashcard', modalContent, [
-        { text: 'H?y', class: 'btn-secondary', onclick: 'closeModal()' },
-        { text: 'L?u', class: 'btn-primary', onclick: `updateFlashcard('${cardId}', '${deckId}')` }
+    openModal('Edit Flashcard', modalContent, [
+        { text: 'Cancel', class: 'btn-secondary', onclick: 'closeModal()' },
+        { text: 'Save', class: 'btn-primary', onclick: `updateFlashcard('${cardId}', '${deckId}')` }
     ]);
 }
 
@@ -532,7 +544,7 @@ async function createFlashcard(deckId) {
     const imageUrl = document.getElementById('cardImageUrl').value;
     
     if (!term || !definition) {
-        showAlert('Vui lòng nh?p Term và Definition', 'error');
+        showAlert('Please enter Term and Definition', 'error');
         return;
     }
     
@@ -548,9 +560,9 @@ async function createFlashcard(deckId) {
     });
     
     if (data) {
-        showAlert('Thêm flashcard thành công!', 'success');
+        showAlert('Flashcard added successfully!', 'success');
         closeModal();
-        navigate(`/deck/${deckId}`);
+        await refreshDeckDetail();
     }
 }
 
@@ -561,7 +573,7 @@ async function updateFlashcard(cardId, deckId) {
     const imageUrl = document.getElementById('editCardImageUrl').value;
     
     if (!term || !definition) {
-        showAlert('Vui lòng nh?p Term và Definition', 'error');
+        showAlert('Please enter Term and Definition', 'error');
         return;
     }
     
@@ -578,22 +590,22 @@ async function updateFlashcard(cardId, deckId) {
     });
     
     if (data) {
-        showAlert('C?p nh?t thành công!', 'success');
+        showAlert('Updated successfully!', 'success');
         closeModal();
-        navigate(`/deck/${deckId}`);
+        await refreshDeckDetail();
     }
 }
 
 async function deleteFlashcard(cardId, deckId) {
-    if (!confirm('B?n có ch?c mu?n xóa flashcard này?')) return;
+    if (!confirm('Are you sure you want to delete this flashcard?')) return;
     
     const data = await apiCall(`/Flashcards/${cardId}`, {
         method: 'DELETE'
     });
     
     if (data) {
-        showAlert('Xóa flashcard thành công!', 'success');
-        navigate(`/deck/${deckId}`);
+        showAlert('Flashcard deleted successfully!', 'success');
+        await refreshDeckDetail();
     }
 }
 
@@ -609,7 +621,7 @@ async function renderStudy(params) {
     
     const deck = await apiCall(`/Decks/${deckId}`);
     if (!deck || !deck.flashcards || deck.flashcards.length === 0) {
-        showAlert('B? th? này ch?a có flashcard nào!', 'error');
+        showAlert('This deck has no flashcards yet!', 'error');
         navigate(`/deck/${deckId}`);
         return;
     }
@@ -617,24 +629,24 @@ async function renderStudy(params) {
     const content = `
         <div class="page-header">
             <div>
-                <a href="#/deck/${deckId}" class="link">? Quay l?i</a>
-                <h1>?? H?c: ${deck.title}</h1>
+                <a href="#/deck/${deckId}" class="link">? Back</a>
+                <h1>Study: ${deck.title}</h1>
             </div>
         </div>
         
         <div class="card">
             <div class="card-header">
-                <h3>Ch?n ch? ?? h?c</h3>
+                <h3>Choose Study Mode</h3>
             </div>
             <div class="btn-group">
                 <button class="btn btn-primary" onclick="startFlashcardMode('${deckId}', ${JSON.stringify(deck.flashcards).replace(/"/g, '&quot;')})">
-                    ?? Flashcard
+                    Flashcard Mode
                 </button>
                 <button class="btn btn-success" onclick="startQuizMode('${deckId}', ${JSON.stringify(deck.flashcards).replace(/"/g, '&quot;')})">
-                    ? Quiz
+                    Quiz Mode
                 </button>
                 <button class="btn btn-warning" onclick="startMatchMode('${deckId}', ${JSON.stringify(deck.flashcards).replace(/"/g, '&quot;')})">
-                    ?? Match Game
+                    Match Game
                 </button>
             </div>
         </div>
@@ -671,14 +683,14 @@ function renderFlashcardView() {
             <div class="progress-bar">
                 <div class="progress-fill" style="width: ${progress}%"></div>
             </div>
-            <p class="text-center text-muted mb-2">Th? ${currentCardIndex + 1} / ${studyCards.length}</p>
+            <p class="text-center text-muted mb-2">Card ${currentCardIndex + 1} / ${studyCards.length}</p>
             
             <div class="flip-card-container">
                 <div class="flip-card" id="flipCard" onclick="document.getElementById('flipCard').classList.toggle('flipped')">
                     <div class="flip-card-front">
                         <div>
                             <h2>${card.term}</h2>
-                            <p class="text-muted mt-2">Click ?? l?t th?</p>
+                            <p class="text-muted mt-2">Click to flip</p>
                         </div>
                     </div>
                     <div class="flip-card-back">
@@ -687,7 +699,7 @@ function renderFlashcardView() {
                             ${card.example ? `<p class="mt-2" style="font-size:1rem; font-style:italic;">${card.example}</p>` : ''}
                             ${card.audioUrl ? `
                                 <button class="btn btn-success btn-sm mt-2" onclick="event.stopPropagation(); playAudio('${card.audioUrl}')">
-                                    ?? Phát âm
+                                    Play Audio
                                 </button>
                             ` : ''}
                         </div>
@@ -697,10 +709,10 @@ function renderFlashcardView() {
             
             <div class="study-controls">
                 <button class="btn btn-secondary" onclick="prevCard()" ${currentCardIndex === 0 ? 'disabled' : ''}>
-                    ? Tr??c
+                    Previous
                 </button>
                 <button class="btn btn-primary" onclick="nextCard()">
-                    ${currentCardIndex === studyCards.length - 1 ? 'Hoàn thành' : 'Ti?p theo ?'}
+                    ${currentCardIndex === studyCards.length - 1 ? 'Finish' : 'Next'}
                 </button>
             </div>
         </div>
@@ -744,7 +756,6 @@ function renderQuizView() {
     const card = quizCards[currentQuizIndex];
     const progress = ((currentQuizIndex + 1) / quizCards.length) * 100;
     
-    // Create wrong answers from other cards
     const otherCards = quizCards.filter((_, i) => i !== currentQuizIndex);
     const wrongAnswers = otherCards
         .sort(() => Math.random() - 0.5)
@@ -759,21 +770,21 @@ function renderQuizView() {
             <div class="progress-bar">
                 <div class="progress-fill" style="width: ${progress}%"></div>
             </div>
-            <p class="text-center text-muted mb-2">Câu ${currentQuizIndex + 1} / ${quizCards.length}</p>
-            <p class="text-center">?i?m: ${quizScore}</p>
+            <p class="text-center text-muted mb-2">Question ${currentQuizIndex + 1} / ${quizCards.length}</p>
+            <p class="text-center">Score: ${quizScore}</p>
             
             <div class="quiz-question">
-                <h2 style="margin-bottom: 20px;">? ${card.term}</h2>
+                <h2 style="margin-bottom: 20px;">${card.term}</h2>
                 <div class="quiz-options" id="quizOptions">
                     ${allAnswers.map((answer, idx) => `
-                        <div class="quiz-option" onclick="selectQuizAnswer('${answer}', '${card.definition}', ${idx})">
+                        <div class="quiz-option" onclick="selectQuizAnswer('${answer.replace(/'/g, "\\'")}', '${card.definition.replace(/'/g, "\\'")}', ${idx})">
                             ${answer}
                         </div>
                     `).join('')}
                 </div>
                 <div id="quizFeedback"></div>
                 <button class="btn btn-primary btn-full mt-2" id="quizNextBtn" style="display:none;" onclick="nextQuiz()">
-                    Ti?p theo ?
+                    Next
                 </button>
             </div>
         </div>
@@ -781,7 +792,7 @@ function renderQuizView() {
 }
 
 function selectQuizAnswer(selected, correct, idx) {
-    if (selectedAnswer !== null) return; // Already answered
+    if (selectedAnswer !== null) return;
     
     selectedAnswer = selected;
     const options = document.querySelectorAll('.quiz-option');
@@ -790,18 +801,17 @@ function selectQuizAnswer(selected, correct, idx) {
         options[idx].classList.add('correct');
         quizScore++;
         document.getElementById('quizFeedback').innerHTML = `
-            <div class="alert alert-success mt-2">? Chính xác!</div>
+            <div class="alert alert-success mt-2">Correct!</div>
         `;
     } else {
         options[idx].classList.add('incorrect');
-        // Highlight correct answer
         options.forEach((opt, i) => {
             if (opt.textContent.trim() === correct) {
                 opt.classList.add('correct');
             }
         });
         document.getElementById('quizFeedback').innerHTML = `
-            <div class="alert alert-error mt-2">? Sai r?i! ?áp án ?úng là: ${correct}</div>
+            <div class="alert alert-error mt-2">Wrong! Correct answer: ${correct}</div>
         `;
     }
     
@@ -831,7 +841,6 @@ function startMatchMode(deckId, cards) {
 }
 
 function renderMatchView() {
-    // Create pairs: terms and definitions
     const terms = matchCards.map((c, i) => ({ id: i, text: c.term, type: 'term' }));
     const definitions = matchCards.map((c, i) => ({ id: i, text: c.definition, type: 'definition' }));
     
@@ -840,10 +849,10 @@ function renderMatchView() {
     document.getElementById('studyArea').innerHTML = `
         <div class="study-container">
             <div class="card-header">
-                <h3>?? Match Game</h3>
+                <h3>Match Game</h3>
                 <div>
-                    <span>?ã ghép: ${matchedPairs}/${matchCards.length}</span> |
-                    <span>L??t ch?i: ${matchAttempts}</span>
+                    <span>Matched: ${matchedPairs}/${matchCards.length}</span> |
+                    <span>Attempts: ${matchAttempts}</span>
                 </div>
             </div>
             
@@ -856,7 +865,7 @@ function renderMatchView() {
             </div>
             
             <div class="text-center mt-3">
-                <p class="text-muted">Ch?n m?t Term và m?t Definition t??ng ?ng</p>
+                <p class="text-muted">Select a Term and matching Definition</p>
             </div>
         </div>
     `;
@@ -874,7 +883,6 @@ function selectMatchCard(idx, id, type) {
         const first = matchSelected[0];
         
         if (first.idx === idx) {
-            // Unselect
             card.classList.remove('selected');
             matchSelected = [];
             return;
@@ -883,7 +891,6 @@ function selectMatchCard(idx, id, type) {
         matchAttempts++;
         
         if (first.type !== type && first.id === id) {
-            // Correct match
             card.classList.add('matched');
             first.element.classList.remove('selected');
             first.element.classList.add('matched');
@@ -896,7 +903,6 @@ function selectMatchCard(idx, id, type) {
                 }, 500);
             }
         } else {
-            // Wrong match
             card.classList.add('wrong');
             first.element.classList.add('wrong');
             
@@ -909,7 +915,6 @@ function selectMatchCard(idx, id, type) {
     }
 }
 
-// Finish Study Session
 async function finishStudySession(mode, score, total) {
     const data = await apiCall('/StudySessions', {
         method: 'POST',
@@ -923,23 +928,22 @@ async function finishStudySession(mode, score, total) {
     
     if (data) {
         const percentage = ((score / total) * 100).toFixed(0);
+        const emoji = percentage >= 80 ? '??' : percentage >= 50 ? '??' : '??';
         const message = `
             <div class="text-center">
-                <h2 style="font-size: 3rem; margin-bottom: 20px;">
-                    ${percentage >= 80 ? '??' : percentage >= 50 ? '??' : '??'}
-                </h2>
-                <h3>Hoàn thành!</h3>
+                <h2 style="font-size: 3rem; margin-bottom: 20px;">${emoji}</h2>
+                <h3>Completed!</h3>
                 <p style="font-size: 1.5rem; margin: 20px 0;">
                     <strong>${score}/${total}</strong> (${percentage}%)
                 </p>
-                <p class="text-muted">Ch? ??: ${mode}</p>
+                <p class="text-muted">Mode: ${mode}</p>
             </div>
         `;
         
-        openModal('K?t qu? h?c t?p', message, [
-            { text: 'Xem Leaderboard', class: 'btn-warning', onclick: `showLeaderboard('${studyDeckId || quizDeckId || matchDeckId}')` },
-            { text: 'H?c l?i', class: 'btn-primary', onclick: `closeModal(); navigate('/study/${studyDeckId || quizDeckId || matchDeckId}')` },
-            { text: 'V? Dashboard', class: 'btn-secondary', onclick: `closeModal(); navigate('/dashboard')` }
+        openModal('Study Results', message, [
+            { text: 'View Leaderboard', class: 'btn-warning', onclick: `showLeaderboard('${studyDeckId || quizDeckId || matchDeckId}')` },
+            { text: 'Study Again', class: 'btn-primary', onclick: `closeModal(); navigate('/study/${studyDeckId || quizDeckId || matchDeckId}')` },
+            { text: 'Go to Dashboard', class: 'btn-secondary', onclick: `closeModal(); navigate('/dashboard')` }
         ]);
     }
 }
@@ -948,7 +952,7 @@ async function showLeaderboard(deckId) {
     const leaderboard = await apiCall(`/StudySessions/leaderboard/${deckId}`);
     
     if (!leaderboard || leaderboard.length === 0) {
-        showAlert('Ch?a có d? li?u x?p h?ng', 'info');
+        showAlert('No leaderboard data yet', 'info');
         return;
     }
     
@@ -968,8 +972,8 @@ async function showLeaderboard(deckId) {
         </div>
     `;
     
-    openModal('?? B?ng X?p H?ng', content, [
-        { text: '?óng', class: 'btn-secondary', onclick: 'closeModal()' }
+    openModal('Leaderboard', content, [
+        { text: 'Close', class: 'btn-secondary', onclick: 'closeModal()' }
     ]);
 }
 
@@ -983,12 +987,12 @@ async function renderProfile() {
     
     const content = `
         <div class="page-header">
-            <h1>?? H? S? C?a Tôi</h1>
+            <h1>My Profile</h1>
         </div>
         
         <div class="card">
             <div class="card-header">
-                <h3>Thông tin cá nhân</h3>
+                <h3>Personal Information</h3>
             </div>
             ${profile.avatarUrl ? `
                 <div style="text-align: center; margin-bottom: 20px;">
@@ -1011,36 +1015,36 @@ async function renderProfile() {
                 <label>Role</label>
                 <input type="text" value="${profile.role}" disabled>
             </div>
-            <button class="btn btn-primary" onclick="updateProfile()">?? L?u thay ??i</button>
+            <button class="btn btn-primary" onclick="updateProfile()">Save Changes</button>
         </div>
         
         <div class="card mt-3">
             <div class="card-header">
-                <h3>?? ??i m?t kh?u</h3>
+                <h3>Change Password</h3>
             </div>
             <div class="form-group">
-                <label>M?t kh?u c?</label>
+                <label>Old Password</label>
                 <input type="password" id="oldPassword">
             </div>
             <div class="form-group">
-                <label>M?t kh?u m?i</label>
+                <label>New Password</label>
                 <input type="password" id="newPassword">
             </div>
             <div class="form-group">
-                <label>Xác nh?n m?t kh?u m?i</label>
+                <label>Confirm New Password</label>
                 <input type="password" id="confirmPassword">
             </div>
-            <button class="btn btn-warning" onclick="changePassword()">??i m?t kh?u</button>
+            <button class="btn btn-warning" onclick="changePassword()">Change Password</button>
         </div>
         
         <div class="card mt-3">
             <div class="card-header">
-                <h3>?? Th?ng kê</h3>
+                <h3>Statistics</h3>
             </div>
-            <p>?? T?ng s? b? th?: <strong>${profile.deckCount}</strong></p>
-            <p>?? Tham gia t?: <strong>${formatDate(profile.createdAt)}</strong></p>
+            <p>Total Decks: <strong>${profile.deckCount}</strong></p>
+            <p>Member Since: <strong>${formatDate(profile.createdAt)}</strong></p>
             <div class="mt-2">
-                <a href="#/history" class="btn btn-primary">?? Xem l?ch s? h?c t?p ??y ??</a>
+                <a href="#/history" class="btn btn-primary">View Full Study History</a>
             </div>
         </div>
     `;
@@ -1053,7 +1057,7 @@ async function updateProfile() {
     const avatarUrl = document.getElementById('profileAvatar').value;
     
     if (!username) {
-        showAlert('Username không ???c ?? tr?ng', 'error');
+        showAlert('Username cannot be empty', 'error');
         return;
     }
     
@@ -1063,12 +1067,11 @@ async function updateProfile() {
     });
     
     if (data) {
-        // Update stored user info
         const userInfo = auth.getUserInfo();
         userInfo.username = username;
         auth.setUserInfo(userInfo);
         
-        showAlert('C?p nh?t h? s? thành công!', 'success');
+        showAlert('Profile updated successfully!', 'success');
         renderProfile();
     }
 }
@@ -1079,17 +1082,17 @@ async function changePassword() {
     const confirmPassword = document.getElementById('confirmPassword').value;
     
     if (!oldPassword || !newPassword || !confirmPassword) {
-        showAlert('Vui lòng ?i?n ??y ?? thông tin', 'error');
+        showAlert('Please fill in all fields', 'error');
         return;
     }
     
     if (newPassword !== confirmPassword) {
-        showAlert('M?t kh?u m?i không kh?p!', 'error');
+        showAlert('New passwords do not match!', 'error');
         return;
     }
     
     if (newPassword.length < 6) {
-        showAlert('M?t kh?u m?i ph?i có ít nh?t 6 ký t?', 'error');
+        showAlert('New password must be at least 6 characters', 'error');
         return;
     }
     
@@ -1099,7 +1102,7 @@ async function changePassword() {
     });
     
     if (data) {
-        showAlert('??i m?t kh?u thành công!', 'success');
+        showAlert('Password changed successfully!', 'success');
         document.getElementById('oldPassword').value = '';
         document.getElementById('newPassword').value = '';
         document.getElementById('confirmPassword').value = '';
@@ -1114,22 +1117,22 @@ async function renderHistory() {
     
     const content = `
         <div class="page-header">
-            <h1>?? L?ch S? H?c T?p</h1>
+            <h1>Study History</h1>
         </div>
         
         ${!history || history.length === 0 ? 
-            renderEmptyState('??', 'Ch?a có l?ch s? h?c t?p', 'Hãy b?t ??u h?c m?t b? th?!') :
+            renderEmptyState('No study history yet', 'Start studying a deck!') :
             `
             <div class="card">
                 <div class="table-container">
                     <table>
                         <thead>
                             <tr>
-                                <th>Th?i gian</th>
-                                <th>B? th?</th>
-                                <th>Ch? ??</th>
-                                <th>?i?m s?</th>
-                                <th>T? l?</th>
+                                <th>Date</th>
+                                <th>Deck</th>
+                                <th>Mode</th>
+                                <th>Score</th>
+                                <th>Percentage</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1159,7 +1162,7 @@ async function renderHistory() {
             
             <div class="card mt-3">
                 <div class="card-header">
-                    <h3>?? Th?ng kê t?ng quan</h3>
+                    <h3>Overall Statistics</h3>
                 </div>
                 ${renderStudyStats(history)}
             </div>
@@ -1171,7 +1174,7 @@ async function renderHistory() {
 }
 
 function renderStudyStats(sessions) {
-    if (!sessions || sessions.length === 0) return '<p>Ch?a có d? li?u</p>';
+    if (!sessions || sessions.length === 0) return '<p>No data available</p>';
     
     const stats = calculateStudyStats(sessions);
     
@@ -1179,24 +1182,24 @@ function renderStudyStats(sessions) {
         <div class="stats-grid">
             <div class="stat-card">
                 <h3>${stats.totalSessions}</h3>
-                <p>T?ng l??t h?c</p>
+                <p>Total Sessions</p>
             </div>
             <div class="stat-card success">
                 <h3>${stats.totalCards}</h3>
-                <p>T?ng s? th? ?ã h?c</p>
+                <p>Total Cards Studied</p>
             </div>
             <div class="stat-card warning">
                 <h3>${stats.averageScore}%</h3>
-                <p>?i?m trung bình</p>
+                <p>Average Score</p>
             </div>
             <div class="stat-card danger">
                 <h3>${stats.streak}</h3>
-                <p>Chu?i ngày h?c</p>
+                <p>Study Streak (days)</p>
             </div>
         </div>
         
         <div class="mt-3">
-            <p><strong>?? Th?ng kê theo ch? ??:</strong></p>
+            <p><strong>Statistics by Mode:</strong></p>
             <ul>
                 ${['Flashcard', 'Quiz', 'Match'].map(mode => {
                     const modeSessions = sessions.filter(s => s.mode === mode);
@@ -1204,14 +1207,13 @@ function renderStudyStats(sessions) {
                     const avgScore = count > 0 
                         ? (modeSessions.reduce((sum, s) => sum + (s.score / s.totalCards * 100), 0) / count).toFixed(1)
                         : 0;
-                    return `<li>${mode}: ${count} l??t (${avgScore}% trung bình)</li>`;
+                    return `<li>${mode}: ${count} sessions (${avgScore}% average)</li>`;
                 }).join('')}
             </ul>
         </div>
     `;
 }
 
-// Helper function for grade calculation
 function getGrade(percentage) {
     if (percentage >= 90) return { letter: 'A', color: '#28a745' };
     if (percentage >= 80) return { letter: 'B', color: '#17a2b8' };
@@ -1220,7 +1222,6 @@ function getGrade(percentage) {
     return { letter: 'F', color: '#dc3545' };
 }
 
-// Helper for study stats calculation
 function calculateStudyStats(sessions) {
     if (!sessions || sessions.length === 0) {
         return {
@@ -1236,11 +1237,7 @@ function calculateStudyStats(sessions) {
     const totalCards = sessions.reduce((sum, s) => sum + s.totalCards, 0);
     const totalCorrect = sessions.reduce((sum, s) => sum + s.score, 0);
     const averageScore = totalCards > 0 ? (totalCorrect / totalCards * 100).toFixed(1) : 0;
-    const bestScore = Math.max(...sessions.map(s => 
-        s.totalCards > 0 ? (s.score / s.totalCards * 100) : 0
-    ));
     
-    // Calculate streak (consecutive days)
     let streak = 0;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -1269,7 +1266,6 @@ function calculateStudyStats(sessions) {
         totalSessions,
         totalCards,
         averageScore,
-        bestScore: bestScore.toFixed(1),
         streak
     };
 }
@@ -1281,7 +1277,7 @@ async function renderAdmin() {
     const userInfo = auth.getUserInfo();
     
     if (userInfo?.role !== 'Admin') {
-        showAlert('B?n không có quy?n truy c?p trang này', 'error');
+        showAlert('You do not have permission to access this page', 'error');
         navigate('/dashboard');
         return;
     }
@@ -1293,15 +1289,15 @@ async function renderAdmin() {
     
     const content = `
         <div class="page-header">
-            <h1>?? Admin Panel</h1>
+            <h1>Admin Panel</h1>
         </div>
         
         <div class="card">
             <div class="card-header">
-                <h3>?? Qu?n lý ng??i dùng</h3>
+                <h3>User Management</h3>
             </div>
             ${!users || users.length === 0 ? 
-                renderEmptyState('??', 'Không có ng??i dùng', '') :
+                renderEmptyState('No users', '') :
                 `<div class="table-container">
                     <table>
                         <thead>
@@ -1309,8 +1305,8 @@ async function renderAdmin() {
                                 <th>Username</th>
                                 <th>Email</th>
                                 <th>Role</th>
-                                <th>Ngày t?o</th>
-                                <th>Thao tác</th>
+                                <th>Created</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1321,7 +1317,7 @@ async function renderAdmin() {
                                     <td><span class="badge badge-primary">${u.role}</span></td>
                                     <td>${formatDate(u.createdAt)}</td>
                                     <td>
-                                        <button class="btn btn-sm btn-danger" onclick="deleteUser('${u.id}')">Xóa</button>
+                                        <button class="btn btn-sm btn-danger" onclick="deleteUser('${u.id}')">Delete</button>
                                     </td>
                                 </tr>
                             `).join('')}
@@ -1333,20 +1329,20 @@ async function renderAdmin() {
         
         <div class="card mt-3">
             <div class="card-header">
-                <h3>?? L?ch s? h?c t?p (Toàn h? th?ng)</h3>
+                <h3>System Study History</h3>
             </div>
             ${!allHistory || allHistory.length === 0 ? 
-                renderEmptyState('??', 'Ch?a có l?ch s?', '') :
+                renderEmptyState('No history', '') :
                 `<div class="table-container">
                     <table>
                         <thead>
                             <tr>
-                                <th>Ng??i dùng</th>
-                                <th>B? th?</th>
-                                <th>Ch? ??</th>
-                                <th>?i?m</th>
-                                <th>Th?i gian</th>
-                                <th>Thao tác</th>
+                                <th>User</th>
+                                <th>Deck</th>
+                                <th>Mode</th>
+                                <th>Score</th>
+                                <th>Date</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1358,7 +1354,7 @@ async function renderAdmin() {
                                     <td>${s.score}/${s.totalCards}</td>
                                     <td>${formatDate(s.dateStudied)}</td>
                                     <td>
-                                        <button class="btn btn-sm btn-danger" onclick="deleteSession('${s.id}')">Xóa</button>
+                                        <button class="btn btn-sm btn-danger" onclick="deleteSession('${s.id}')">Delete</button>
                                     </td>
                                 </tr>
                             `).join('')}
@@ -1373,27 +1369,27 @@ async function renderAdmin() {
 }
 
 async function deleteUser(userId) {
-    if (!confirm('B?n có ch?c mu?n xóa ng??i dùng này?')) return;
+    if (!confirm('Are you sure you want to delete this user?')) return;
     
     const data = await apiCall(`/Users/${userId}`, {
         method: 'DELETE'
     });
     
     if (data) {
-        showAlert('Xóa ng??i dùng thành công!', 'success');
+        showAlert('User deleted successfully!', 'success');
         renderAdmin();
     }
 }
 
 async function deleteSession(sessionId) {
-    if (!confirm('B?n có ch?c mu?n xóa session này?')) return;
+    if (!confirm('Are you sure you want to delete this session?')) return;
     
     const data = await apiCall(`/StudySessions/admin/${sessionId}`, {
         method: 'DELETE'
     });
     
     if (data) {
-        showAlert('Xóa session thành công!', 'success');
+        showAlert('Session deleted successfully!', 'success');
         renderAdmin();
     }
 }
@@ -1402,7 +1398,7 @@ async function deleteSession(sessionId) {
 // NOT FOUND PAGE
 // ============================
 function renderNotFound() {
-    const content = renderEmptyState('?', '404 - Không tìm th?y trang', 'Trang b?n tìm ki?m không t?n t?i');
+    const content = renderEmptyState('404 - Page Not Found', 'The page you are looking for does not exist');
     document.getElementById('app').innerHTML = renderLayout(content);
 }
 
@@ -1418,23 +1414,23 @@ function renderLayout(content) {
         <div class="app-container">
             <aside class="sidebar">
                 <div class="sidebar-header">
-                    <h2>?? Flashcard</h2>
+                    <h2>Flashcard Learning</h2>
                     <div class="user-info">
-                        <div>?? ${userInfo?.username || 'User'}</div>
+                        <div>${userInfo?.username || 'User'}</div>
                         <div style="font-size:0.75rem; opacity:0.7">${userInfo?.role || 'User'}</div>
                     </div>
                 </div>
                 <ul class="sidebar-menu">
-                    <li><a href="#/dashboard" class="${currentHash.includes('dashboard') ? 'active' : ''}">?? Dashboard</a></li>
-                    <li><a href="#/decks" class="${currentHash.includes('decks') || currentHash.includes('deck/') ? 'active' : ''}">?? My Decks</a></li>
-                    <li><a href="#/history" class="${currentHash.includes('history') ? 'active' : ''}">?? Study History</a></li>
-                    <li><a href="#/profile" class="${currentHash.includes('profile') ? 'active' : ''}">?? Profile</a></li>
-                    ${isAdmin ? `<li><a href="#/admin" class="${currentHash.includes('admin') ? 'active' : ''}">?? Admin Panel</a></li>` : ''}
-                    <li style="margin-top: 20px;"><a href="#/logout" style="color:#ff6b6b;">?? ??ng xu?t</a></li>
+                    <li><a href="#/dashboard" class="${currentHash.includes('dashboard') ? 'active' : ''}">Dashboard</a></li>
+                    <li><a href="#/decks" class="${currentHash.includes('decks') || currentHash.includes('deck/') ? 'active' : ''}">My Decks</a></li>
+                    <li><a href="#/history" class="${currentHash.includes('history') ? 'active' : ''}">Study History</a></li>
+                    <li><a href="#/profile" class="${currentHash.includes('profile') ? 'active' : ''}">Profile</a></li>
+                    ${isAdmin ? `<li><a href="#/admin" class="${currentHash.includes('admin') ? 'active' : ''}">Admin Panel</a></li>` : ''}
+                    <li style="margin-top: 20px;"><a href="#/logout" style="color:#ff6b6b;">Logout</a></li>
                 </ul>
                 <div style="position: absolute; bottom: 20px; left: 20px; right: 20px; font-size: 0.75rem; opacity: 0.5; text-align: center;">
-                    <a href="/guide.html" target="_blank" style="color: white;">?? Guide</a> | 
-                    <a href="/test-api.html" target="_blank" style="color: white;">?? API Test</a>
+                    <a href="/guide.html" target="_blank" style="color: white;">Guide</a> | 
+                    <a href="/test-api.html" target="_blank" style="color: white;">API Test</a>
                 </div>
             </aside>
             <main class="main-content">

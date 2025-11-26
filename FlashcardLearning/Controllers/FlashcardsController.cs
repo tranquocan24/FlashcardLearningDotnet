@@ -16,11 +16,13 @@ namespace FlashcardLearning.Controllers
     {
         private readonly AppDbContext _context;
         private readonly DictionaryService _dictionaryService;
+        private readonly ILogger<FlashcardsController> _logger;
 
-        public FlashcardsController(AppDbContext context, DictionaryService dictionaryService)
+        public FlashcardsController(AppDbContext context, DictionaryService dictionaryService, ILogger<FlashcardsController> logger)
         {
             _context = context;
-            _dictionaryService = dictionaryService; 
+            _dictionaryService = dictionaryService;
+            _logger = logger;
         }
 
         [HttpGet("{id}")]
@@ -30,7 +32,7 @@ namespace FlashcardLearning.Controllers
                                      .Include(f => f.Deck)
                                      .FirstOrDefaultAsync(f => f.Id == id);
 
-            if (card == null) return NotFound("Không tìm thấy thẻ.");
+            if (card == null) return NotFound("Flashcard not found.");
 
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var currentUserRole = User.FindFirstValue(ClaimTypes.Role);
@@ -49,58 +51,83 @@ namespace FlashcardLearning.Controllers
         [HttpPost]
         public async Task<ActionResult<Flashcard>> CreateFlashcard(Flashcard flashcard)
         {
-            // --- PHẦN 1: KIỂM TRA DECK VÀ QUYỀN (Giữ nguyên code của bạn) ---
-            var deck = await _context.Decks.FindAsync(flashcard.DeckId);
-            if (deck == null)
+            try
             {
-                return NotFound("Bộ thẻ (Deck) không tồn tại.");
+                _logger.LogInformation("Creating flashcard with term: {Term}", flashcard.Term);
+
+                // Validate deck exists
+                var deck = await _context.Decks.FindAsync(flashcard.DeckId);
+                if (deck == null)
+                {
+                    return NotFound("Deck not found.");
+                }
+
+                // Check permissions
+                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var currentUserRole = User.FindFirstValue(ClaimTypes.Role);
+
+                if (deck.UserId?.ToString() != currentUserId && currentUserRole != UserRoles.Admin)
+                {
+                    return Forbid();
+                }
+
+                // Prepare data
+                flashcard.Id = Guid.NewGuid();
+                flashcard.Example = flashcard.Example ?? "";
+                flashcard.ImageUrl = flashcard.ImageUrl ?? "";
+
+                // Auto-generate audio (with timeout protection)
+                if (string.IsNullOrEmpty(flashcard.AudioUrl))
+                {
+                    try
+                    {
+                        _logger.LogInformation("Fetching audio for term: {Term}", flashcard.Term);
+                        
+                        string? autoAudioUrl = await _dictionaryService.GetAudioUrlAsync(flashcard.Term);
+                        flashcard.AudioUrl = autoAudioUrl ?? "";
+                        
+                        if (!string.IsNullOrEmpty(autoAudioUrl))
+                        {
+                            _logger.LogInformation("Audio found for term: {Term}", flashcard.Term);
+                        }
+                        else
+                        {
+                            _logger.LogInformation("No audio found for term: {Term}", flashcard.Term);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Don't fail the whole request if audio fetch fails
+                        _logger.LogWarning(ex, "Failed to fetch audio for term: {Term}", flashcard.Term);
+                        flashcard.AudioUrl = "";
+                    }
+                }
+
+                // Save to database
+                _context.Flashcards.Add(flashcard);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Flashcard created successfully with ID: {Id}", flashcard.Id);
+
+                return CreatedAtAction(nameof(GetFlashcard), new { id = flashcard.Id }, flashcard);
             }
-
-            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var currentUserRole = User.FindFirstValue(ClaimTypes.Role);
-
-            // Lưu ý: Đảm bảo deck.UserId không null trước khi ToString() để tránh lỗi
-            if (deck.UserId?.ToString() != currentUserId && currentUserRole != UserRoles.Admin)
+            catch (Exception ex)
             {
-                return Forbid();
+                _logger.LogError(ex, "Error creating flashcard");
+                return StatusCode(500, new { message = "Error creating flashcard", error = ex.Message });
             }
-
-            // --- PHẦN 2: CHUẨN BỊ DỮ LIỆU ---
-            flashcard.Id = Guid.NewGuid();
-
-            // Xử lý null cho các trường string (Giữ nguyên code của bạn)
-            if (string.IsNullOrEmpty(flashcard.Example)) flashcard.Example = "";
-            if (string.IsNullOrEmpty(flashcard.ImageUrl)) flashcard.ImageUrl = "";
-
-            // --- PHẦN 3: TỰ ĐỘNG LẤY AUDIO (Code mới thêm vào) ---
-            // Chỉ gọi API nếu client chưa gửi link Audio lên
-            if (string.IsNullOrEmpty(flashcard.AudioUrl))
-            {
-                // Gọi service lấy link mp3 từ từ điển
-                string? autoAudioUrl = await _dictionaryService.GetAudioUrlAsync(flashcard.Term);
-
-                // Nếu tìm thấy thì gán vào, không thấy thì để rỗng hoặc null
-                flashcard.AudioUrl = autoAudioUrl ?? "";
-            }
-
-            // --- PHẦN 4: LƯU VÀO DATABASE ---
-            _context.Flashcards.Add(flashcard);
-            await _context.SaveChangesAsync();
-
-            // Trả về kết quả
-            return CreatedAtAction(nameof(GetFlashcard), new { id = flashcard.Id }, flashcard);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateFlashcard(Guid id, Flashcard flashcardUpdate)
         {
-            if (id != flashcardUpdate.Id) return BadRequest("ID trên URL không khớp với ID trong dữ liệu.");
+            if (id != flashcardUpdate.Id) return BadRequest("ID mismatch.");
 
             var existingCard = await _context.Flashcards
                                              .Include(f => f.Deck)
                                              .FirstOrDefaultAsync(f => f.Id == id);
 
-            if (existingCard == null) return NotFound("Thẻ không tồn tại.");
+            if (existingCard == null) return NotFound("Flashcard not found.");
 
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var currentUserRole = User.FindFirstValue(ClaimTypes.Role);
@@ -137,7 +164,7 @@ namespace FlashcardLearning.Controllers
                                      .Include(f => f.Deck)
                                      .FirstOrDefaultAsync(f => f.Id == id);
 
-            if (card == null) return NotFound("Thẻ không tồn tại.");
+            if (card == null) return NotFound("Flashcard not found.");
 
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var currentUserRole = User.FindFirstValue(ClaimTypes.Role);

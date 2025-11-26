@@ -29,5 +29,6 @@ namespace FlashcardLearning.Models
         public ICollection<Deck>? Decks { get; set; }
         public ICollection<Folder>? Folders { get; set; }
         public ICollection<StudySession>? StudySessions { get; set; }
+        public virtual ICollection<Folder> Folders { get; set; } = new List<Folder>();
     }
 }

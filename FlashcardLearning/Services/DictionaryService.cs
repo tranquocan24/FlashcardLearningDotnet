@@ -9,15 +9,25 @@ namespace FlashcardLearning.Services
         public DictionaryService(HttpClient httpClient)
         {
             _httpClient = httpClient;
+            // Set timeout to prevent hanging
+            _httpClient.Timeout = TimeSpan.FromSeconds(5);
         }
 
         public async Task<string?> GetAudioUrlAsync(string word)
         {
             try
             {
-                // Gọi API miễn phí
+                // Validate input
+                if (string.IsNullOrWhiteSpace(word)) return null;
+                
+                // Only process English words (simple check)
+                word = word.Trim().ToLower();
+                
+                // Call free API with timeout
                 var url = $"https://api.dictionaryapi.dev/api/v2/entries/en/{word}";
-                var response = await _httpClient.GetAsync(url);
+                
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+                var response = await _httpClient.GetAsync(url, cts.Token);
 
                 if (!response.IsSuccessStatusCode) return null;
 
@@ -25,7 +35,7 @@ namespace FlashcardLearning.Services
                 using var doc = JsonDocument.Parse(jsonString);
                 var root = doc.RootElement;
 
-                // Cấu trúc JSON trả về là mảng, lấy phần tử đầu tiên
+                // Parse JSON array response
                 if (root.GetArrayLength() > 0)
                 {
                     var firstEntry = root[0];
@@ -33,7 +43,7 @@ namespace FlashcardLearning.Services
                     {
                         foreach (var phone in phonetics.EnumerateArray())
                         {
-                            // Tìm cái nào có chứa audio
+                            // Find the one with audio
                             if (phone.TryGetProperty("audio", out var audio) &&
                                 !string.IsNullOrEmpty(audio.GetString()))
                             {
@@ -44,9 +54,16 @@ namespace FlashcardLearning.Services
                 }
                 return null;
             }
-            catch
+            catch (OperationCanceledException)
             {
-                // Nếu lỗi mạng hoặc không tìm thấy thì trả về null (chấp nhận không có tiếng)
+                // Timeout - return null instead of throwing
+                Console.WriteLine($"Dictionary API timeout for word: {word}");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                // Any other error - log and return null
+                Console.WriteLine($"Dictionary API error for word: {word}, Error: {ex.Message}");
                 return null;
             }
         }

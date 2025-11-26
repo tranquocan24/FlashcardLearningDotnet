@@ -5,6 +5,7 @@ namespace FlashcardLearning.Models
     public class AppDbContext : DbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+
         public DbSet<User> Users { get; set; }
         public DbSet<Deck> Decks { get; set; }
         public DbSet<Flashcard> Flashcards { get; set; }
@@ -15,27 +16,36 @@ namespace FlashcardLearning.Models
         {
             base.OnModelCreating(modelBuilder);
 
-            // 1.User xóa -> Deck xóa theo (Cascade Delete)
+            // ============================================
+            // 1. USER -> DECK (Cascade Delete)
+            // ============================================
             modelBuilder.Entity<Deck>()
                 .HasOne(d => d.Owner)
                 .WithMany(u => u.Decks)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // 2.Deck xóa -> Flashcards xóa theo
+            // ============================================
+            // 2. DECK -> FLASHCARD (Cascade Delete)
+            // ============================================
             modelBuilder.Entity<Flashcard>()
                 .HasOne(f => f.Deck)
                 .WithMany(d => d.Flashcards)
                 .HasForeignKey(f => f.DeckId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // 3.User xóa -> Xóa Session. Nhưng Deck xóa -> KHÔNG xóa Session (để Restrict)
+            // ============================================
+            // 3. USER -> STUDY SESSION (No Action)
+            // ============================================
             modelBuilder.Entity<StudySession>()
                 .HasOne(s => s.User)
                 .WithMany(u => u.StudySessions)
                 .HasForeignKey(s => s.UserId)
                 .OnDelete(DeleteBehavior.NoAction);
 
+            // ============================================
+            // 4. DECK -> STUDY SESSION (Cascade)
+            // ============================================
             modelBuilder.Entity<StudySession>()
                 .HasOne(s => s.Deck)
                 .WithMany()

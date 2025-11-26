@@ -51,13 +51,13 @@ async function apiCall(endpoint, options = {}) {
 
         // Handle forbidden
         if (response.status === 403) {
-            showAlert('B?n không có quy?n th?c hi?n thao tác này', 'error');
+            showAlert('You do not have permission to perform this action', 'error');
             return null;
         }
 
         // Handle not found
         if (response.status === 404) {
-            showAlert('Không tìm th?y d? li?u', 'error');
+            showAlert('Data not found', 'error');
             return null;
         }
 
@@ -75,7 +75,7 @@ async function apiCall(endpoint, options = {}) {
         return data;
     } catch (error) {
         console.error('API Error:', error);
-        showAlert(error.message || '?ã có l?i x?y ra', 'error');
+        showAlert(error.message || 'An error occurred', 'error');
         return null;
     } finally {
         hideLoading();
@@ -159,7 +159,7 @@ function closeModal() {
 // ============================
 function formatDate(dateString) {
     const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN', {
+    return date.toLocaleDateString('en-US', {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
@@ -189,8 +189,8 @@ function renderLayout(content) {
                     <li><a href="#/dashboard" class="${window.location.hash.includes('dashboard') ? 'active' : ''}">?? Dashboard</a></li>
                     <li><a href="#/decks" class="${window.location.hash.includes('decks') ? 'active' : ''}">?? My Decks</a></li>
                     <li><a href="#/profile" class="${window.location.hash.includes('profile') ? 'active' : ''}">?? Profile</a></li>
-                    ${isAdmin ? '<li><a href="#/admin">?? Admin Panel</a></li>' : ''}
-                    <li><a href="#/logout" style="color:#ff6b6b;">?? ??ng xu?t</a></li>
+                    ${isAdmin ? '<li><a href="#/admin">??? Admin Panel</a></li>' : ''}
+                    <li><a href="#/logout" style="color:#ff6b6b;">?? Logout</a></li>
                 </ul>
             </aside>
             <main class="main-content">
@@ -218,13 +218,13 @@ function renderEmptyState(icon, title, description) {
 // ============================
 function playAudio(url) {
     if (!url) {
-        showAlert('Không có file audio', 'error');
+        showAlert('No audio file available', 'error');
         return;
     }
     
     const audio = new Audio(url);
     audio.play().catch(err => {
         console.error('Audio error:', err);
-        showAlert('Không th? phát audio', 'error');
+        showAlert('Cannot play audio', 'error');
     });
 }

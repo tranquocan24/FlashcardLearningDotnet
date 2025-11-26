@@ -174,6 +174,7 @@ function formatDate(dateString) {
 function renderLayout(content) {
     const userInfo = auth.getUserInfo();
     const isAdmin = userInfo?.role === 'Admin';
+    const currentHash = window.location.hash;
     
     return `
         <div class="app-container">
@@ -186,11 +187,13 @@ function renderLayout(content) {
                     </div>
                 </div>
                 <ul class="sidebar-menu">
-                    <li><a href="#/dashboard" class="${window.location.hash.includes('dashboard') ? 'active' : ''}">?? Dashboard</a></li>
-                    <li><a href="#/decks" class="${window.location.hash.includes('decks') ? 'active' : ''}">?? My Decks</a></li>
-                    <li><a href="#/profile" class="${window.location.hash.includes('profile') ? 'active' : ''}">?? Profile</a></li>
-                    ${isAdmin ? '<li><a href="#/admin">??? Admin Panel</a></li>' : ''}
-                    <li><a href="#/logout" style="color:#ff6b6b;">?? Logout</a></li>
+                    <li><a href="#/dashboard" class="${currentHash.includes('dashboard') ? 'active' : ''}">?? Dashboard</a></li>
+                    <li><a href="#/decks" class="${currentHash.includes('decks') || currentHash.includes('deck/') ? 'active' : ''}">?? My Decks</a></li>
+                    <li><a href="#/folders" class="${currentHash.includes('folder') ? 'active' : ''}">?? Folders</a></li>
+                    <li><a href="#/history" class="${currentHash.includes('history') ? 'active' : ''}">?? Study History</a></li>
+                    <li><a href="#/profile" class="${currentHash.includes('profile') ? 'active' : ''}">?? Profile</a></li>
+                    ${isAdmin ? `<li><a href="#/admin" class="${currentHash.includes('admin') ? 'active' : ''}">?? Admin Panel</a></li>` : ''}
+                    <li style="margin-top: 20px;"><a href="#/logout" style="color:#ff6b6b;">?? Logout</a></li>
                 </ul>
             </aside>
             <main class="main-content">

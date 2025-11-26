@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>?? Folders Feature Demo - Flashcard Learning</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        body {
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .demo-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .demo-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .demo-header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .demo-section {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+        .demo-section h2 {
+            color: #4257b2;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #4257b2;
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        .feature-list li {
+            padding: 12px;
+            margin-bottom: 8px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .feature-list li:before {
+            content: "? ";
+            margin-right: 8px;
+        }
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        .api-endpoint {
+            background: #e3f2fd;
+            padding: 15px;
+            border-left: 4px solid #2196f3;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .api-endpoint strong {
+            color: #1976d2;
+        }
+        .demo-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .screenshot-placeholder {
+            background: #e9ecef;
+            padding: 60px;
+            text-align: center;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 2px dashed #adb5bd;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1>?? Folders Feature Demo</h1>
+            <p style="color: #6c757d; font-size: 1.1rem;">
+                T? ch?c Decks c?a b?n m?t cách khoa h?c v?i tính n?ng Folders
+            </p>
+        </div>
+
+        <!-- Feature Overview -->
+        <div class="demo-section">
+            <h2>?? Tính n?ng ?ã implement</h2>
+            <ul class="feature-list">
+                <li><strong>Qu?n lý Folders:</strong> T?o, xem, xóa folders</li>
+                <li><strong>Di chuy?n Decks:</strong> Move decks vào/ra folders qua modal</li>
+                <li><strong>Folder Detail:</strong> Xem t?t c? decks trong m?t folder</li>
+                <li><strong>Unassigned Decks:</strong> Xem decks không thu?c folder nào</li>
+                <li><strong>Tích h?p Create/Edit:</strong> Ch?n folder khi t?o/s?a deck</li>
+                <li><strong>Beautiful UI:</strong> Gradient cards, icons, badges</li>
+                <li><strong>Responsive Design:</strong> Ho?t ??ng t?t trên m?i thi?t b?</li>
+            </ul>
+        </div>
+
+        <!-- API Endpoints -->
+        <div class="demo-section">
+            <h2>?? API Endpoints</h2>
+            
+            <div class="api-endpoint">
+                <strong>GET</strong> /api/Folders
+                <p style="margin: 5px 0 0 0; color: #666;">L?y danh sách folders c?a user</p>
+            </div>
+            
+            <div class="api-endpoint">
+                <strong>POST</strong> /api/Folders
+                <p style="margin: 5px 0 0 0; color: #666;">T?o folder m?i</p>
+                <div class="code-block" style="margin-top: 10px; font-size: 0.85rem;">
+{
+    "name": "IELTS Preparation",
+    "description": "All IELTS related decks"
+}
+                </div>
+            </div>
+            
+            <div class="api-endpoint">
+                <strong>GET</strong> /api/Folders/{id}
+                <p style="margin: 5px 0 0 0; color: #666;">Chi ti?t folder + danh sách decks bên trong</p>
+            </div>
+            
+            <div class="api-endpoint">
+                <strong>DELETE</strong> /api/Folders/{id}
+                <p style="margin: 5px 0 0 0; color: #666;">Xóa folder (Decks s? không b? xóa)</p>
+            </div>
+            
+            <div class="api-endpoint">
+                <strong>GET</strong> /api/Folders/unassigned-decks
+                <p style="margin: 5px 0 0 0; color: #666;">L?y decks không có folder</p>
+            </div>
+            
+            <div class="api-endpoint">
+                <strong>PUT</strong> /api/Decks/{id}
+                <p style="margin: 5px 0 0 0; color: #666;">Update deck (bao g?m folderId)</p>
+                <div class="code-block" style="margin-top: 10px; font-size: 0.85rem;">
+{
+    "title": "Deck Name",
+    "description": "...",
+    "isPublic": true,
+    "folderId": "guid-here" // ho?c null ?? unassign
+}
+                </div>
+            </div>
+        </div>
+
+        <!-- User Flow -->
+        <div class="demo-section">
+            <h2>?? User Flow</h2>
+            
+            <h3 style="color: #667eea; margin-top: 20px;">1?? T?o Folder</h3>
+            <ol style="line-height: 2;">
+                <li>Click "?? Folders" trong sidebar</li>
+                <li>Click "+ Create New Folder"</li>
+                <li>Nh?p tên folder (required)</li>
+                <li>Nh?p mô t? (optional)</li>
+                <li>Click "? Create"</li>
+            </ol>
+            
+            <h3 style="color: #667eea; margin-top: 20px;">2?? Di chuy?n Deck vào Folder</h3>
+            <ol style="line-height: 2;">
+                <li>Vào "?? My Decks"</li>
+                <li>Click nút "??" trên deck card</li>
+                <li>Ch?n folder ?ích t? dropdown</li>
+                <li>Click "? Move"</li>
+            </ol>
+            
+            <h3 style="color: #667eea; margin-top: 20px;">3?? Xem Decks trong Folder</h3>
+            <ol style="line-height: 2;">
+                <li>Click vào folder card</li>
+                <li>Xem t?t c? decks bên trong</li>
+                <li>Click deck ?? h?c ho?c ch?nh s?a</li>
+            </ol>
+        </div>
+
+        <!-- File Structure -->
+        <div class="demo-section">
+            <h2>?? File Structure</h2>
+            <div class="code-block">
+wwwroot/
+??? css/
+?   ??? style.css              ? ?ã thêm styles cho folders
+??? js/
+?   ??? app.js                 ? ?ã update renderLayout
+?   ??? folders.js             ? M?i t?o - logic folders
+?   ??? router.js              ? ?ã thêm routes
+??? index.html                 ? ?ã load folders.js
+            </div>
+        </div>
+
+        <!-- Screenshots Placeholder -->
+        <div class="demo-section">
+            <h2>??? UI Preview</h2>
+            
+            <h3 style="margin-top: 20px;">Folders List Page</h3>
+            <div class="screenshot-placeholder">
+                <p style="color: #6c757d; font-size: 1.2rem;">?? Folders Grid v?i Gradient Cards</p>
+                <p style="color: #adb5bd; margin-top: 10px;">M?i folder có icon, tên, mô t?, s? decks, nút View/Delete</p>
+            </div>
+            
+            <h3 style="margin-top: 20px;">Move Deck Modal</h3>
+            <div class="screenshot-placeholder">
+                <p style="color: #6c757d; font-size: 1.2rem;">?? Dropdown ch?n folder</p>
+                <p style="color: #adb5bd; margin-top: 10px;">Có option "Remove from folder" ?? unassign</p>
+            </div>
+            
+            <h3 style="margin-top: 20px;">Folder Detail Page</h3>
+            <div class="screenshot-placeholder">
+                <p style="color: #6c757d; font-size: 1.2rem;">?? Danh sách decks trong folder</p>
+                <p style="color: #adb5bd; margin-top: 10px;">Header gradient + deck grid + move buttons</p>
+            </div>
+        </div>
+
+        <!-- Testing Guide -->
+        <div class="demo-section">
+            <h2>?? Testing Guide</h2>
+            
+            <h3 style="color: #28a745;">? Checklist</h3>
+            <ol style="line-height: 2.5;">
+                <li>[ ] T?o folder m?i thành công</li>
+                <li>[ ] Xóa folder ? decks không b? m?t</li>
+                <li>[ ] Di chuy?n deck vào folder</li>
+                <li>[ ] Di chuy?n deck ra kh?i folder</li>
+                <li>[ ] T?o deck v?i folder ngay t? ??u</li>
+                <li>[ ] Edit deck ?? ??i folder</li>
+                <li>[ ] Xem folder detail hi?n th? ?úng</li>
+                <li>[ ] Unassigned decks hi?n th? ??y ??</li>
+                <li>[ ] Navigation ho?t ??ng m??t mà</li>
+                <li>[ ] Modal ?óng/m? không l?i</li>
+            </ol>
+            
+            <h3 style="color: #dc3545; margin-top: 20px;">?? Common Issues</h3>
+            <ul style="line-height: 2;">
+                <li><strong>API 401:</strong> Token h?t h?n ? Logout và login l?i</li>
+                <li><strong>API 500:</strong> Backend error ? Check server logs</li>
+                <li><strong>Empty dropdown:</strong> Ch?a có folder nào ? T?o folder tr??c</li>
+                <li><strong>Layout broken:</strong> Clear cache và hard refresh (Ctrl+Shift+R)</li>
+            </ul>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="demo-section">
+            <h2>?? Quick Links</h2>
+            <div class="demo-buttons">
+                <a href="/" class="btn btn-primary">?? Go to App</a>
+                <a href="/guide.html" class="btn btn-secondary" target="_blank">?? API Guide</a>
+                <a href="/test-api.html" class="btn btn-success" target="_blank">?? Test API</a>
+                <a href="/FOLDERS_FEATURE_GUIDE.md" class="btn btn-warning" target="_blank">?? Full Documentation</a>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="text-align: center; margin-top: 40px; padding-top: 30px; border-top: 2px solid #e9ecef;">
+            <p style="color: #6c757d;">
+                <strong>?? Folders Feature v1.0</strong><br>
+                Built with ?? for Flashcard Learning Platform
+            </p>
+            <p style="color: #adb5bd; font-size: 0.9rem; margin-top: 10px;">
+                © 2024 Flashcard Learning. All rights reserved.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

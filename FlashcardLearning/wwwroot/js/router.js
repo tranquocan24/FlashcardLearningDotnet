@@ -9,6 +9,8 @@ const routes = {
     '/decks': renderDecks,
     '/deck': renderDeckDetail,
     '/study': renderStudy,
+    '/folders': renderFolders,
+    '/folder': renderFolderDetail,
     '/profile': renderProfile,
     '/history': renderHistory,
     '/admin': renderAdmin,
@@ -50,6 +52,10 @@ async function router() {
             const id = route.split('/study/')[1];
             params.set('id', id);
             routeHandler = renderStudy;
+        } else if (route.startsWith('/folder/')) {
+            const id = route.split('/folder/')[1];
+            params.set('id', id);
+            routeHandler = renderFolderDetail;
         }
     }
     
@@ -262,29 +268,34 @@ async function renderDecks() {
     const content = `
         <div class="page-header">
             <h1>My Decks</h1>
-            <button class="btn btn-primary" onclick="showCreateDeckModal()">+ Create New Deck</button>
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="navigate('/folders')">?? Manage Folders</button>
+                <button class="btn btn-primary" onclick="showCreateDeckModal()">+ Create New Deck</button>
+            </div>
         </div>
         
         ${!decks || decks.length === 0 ? 
-            renderEmptyState('No decks yet', 'Create your first deck to start learning!') :
+            renderEmptyState('??', 'No decks yet', 'Create your first deck to start learning!') :
             `<div class="deck-grid">
                 ${decks.map(deck => `
                     <div class="deck-item" onclick="navigate('/deck/${deck.id}')">
                         <h3>${deck.title}</h3>
                         <p>${deck.description || 'No description'}</p>
+                        ${deck.folderId ? '<div class="current-folder-badge">?? In Folder</div>' : ''}
                         <div class="deck-meta">
                             <div>
                                 <span class="badge ${deck.isPublic ? 'badge-public' : 'badge-private'}">
-                                    ${deck.isPublic ? 'Public' : 'Private'}
+                                    ${deck.isPublic ? '?? Public' : '?? Private'}
                                 </span>
                                 <span class="text-muted" style="margin-left:10px;">
-                                    ${deck.flashcards?.length || 0} cards
+                                    ${deck.flashcardCount || 0} cards
                                 </span>
                             </div>
                             <div class="deck-actions" onclick="event.stopPropagation()">
-                                <button class="btn btn-sm btn-primary" onclick="navigate('/study/${deck.id}')">Study</button>
-                                <button class="btn btn-sm btn-secondary" onclick="showEditDeckModal('${deck.id}')">Edit</button>
-                                <button class="btn btn-sm btn-danger" onclick="deleteDeck('${deck.id}')">Delete</button>
+                                <button class="btn btn-sm btn-success" onclick="navigate('/study/${deck.id}')">??</button>
+                                <button class="btn btn-sm btn-warning" onclick="showMoveDeckModal('${deck.id}', '${deck.folderId || ''}')">??</button>
+                                <button class="btn btn-sm btn-secondary" onclick="showEditDeckModal('${deck.id}')">??</button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteDeck('${deck.id}')">???</button>
                             </div>
                         </div>
                     </div>
@@ -307,6 +318,12 @@ function showCreateDeckModal() {
             <textarea id="deckDescription" placeholder="Brief description of the deck..."></textarea>
         </div>
         <div class="form-group">
+            <label>?? Folder (Optional)</label>
+            <select id="deckFolderId">
+                <option value="">-- No Folder --</option>
+            </select>
+        </div>
+        <div class="form-group">
             <div class="checkbox-group">
                 <input type="checkbox" id="deckIsPublic">
                 <label>Make public for everyone</label>
@@ -318,6 +335,9 @@ function showCreateDeckModal() {
         { text: 'Cancel', class: 'btn-secondary', onclick: 'closeModal()' },
         { text: 'Create', class: 'btn-primary', onclick: 'createDeck()' }
     ]);
+    
+    // Load folders into dropdown
+    populateFolderDropdown('deckFolderId');
 }
 
 async function showEditDeckModal(deckId) {
@@ -334,6 +354,12 @@ async function showEditDeckModal(deckId) {
             <textarea id="editDeckDescription">${deck.description || ''}</textarea>
         </div>
         <div class="form-group">
+            <label>?? Folder (Optional)</label>
+            <select id="editDeckFolderId">
+                <option value="">-- No Folder --</option>
+            </select>
+        </div>
+        <div class="form-group">
             <div class="checkbox-group">
                 <input type="checkbox" id="editDeckIsPublic" ${deck.isPublic ? 'checked' : ''}>
                 <label>Make public for everyone</label>
@@ -345,12 +371,16 @@ async function showEditDeckModal(deckId) {
         { text: 'Cancel', class: 'btn-secondary', onclick: 'closeModal()' },
         { text: 'Save', class: 'btn-primary', onclick: `updateDeck('${deckId}')` }
     ]);
+    
+    // Load folders into dropdown with current selection
+    populateFolderDropdown('editDeckFolderId', deck.folderId);
 }
 
 async function createDeck() {
     const title = document.getElementById('deckTitle').value;
     const description = document.getElementById('deckDescription').value;
     const isPublic = document.getElementById('deckIsPublic').checked;
+    const folderId = document.getElementById('deckFolderId').value || null;
     
     if (!title) {
         showAlert('Please enter deck name', 'error');
@@ -359,7 +389,7 @@ async function createDeck() {
     
     const data = await apiCall('/Decks', {
         method: 'POST',
-        body: JSON.stringify({ title, description, isPublic })
+        body: JSON.stringify({ title, description, isPublic, folderId })
     });
     
     if (data) {
@@ -373,6 +403,7 @@ async function updateDeck(deckId) {
     const title = document.getElementById('editDeckTitle').value;
     const description = document.getElementById('editDeckDescription').value;
     const isPublic = document.getElementById('editDeckIsPublic').checked;
+    const folderId = document.getElementById('editDeckFolderId').value || null;
     
     if (!title) {
         showAlert('Please enter deck name', 'error');
@@ -381,7 +412,7 @@ async function updateDeck(deckId) {
     
     const data = await apiCall(`/Decks/${deckId}`, {
         method: 'PUT',
-        body: JSON.stringify({ id: deckId, title, description, isPublic })
+        body: JSON.stringify({ title, description, isPublic, folderId })
     });
     
     if (data) {
@@ -943,7 +974,7 @@ async function finishStudySession(mode, score, total) {
         openModal('Study Results', message, [
             { text: 'View Leaderboard', class: 'btn-warning', onclick: `showLeaderboard('${studyDeckId || quizDeckId || matchDeckId}')` },
             { text: 'Study Again', class: 'btn-primary', onclick: `closeModal(); navigate('/study/${studyDeckId || quizDeckId || matchDeckId}')` },
-            { text: 'Go to Dashboard', class: 'btn-secondary', onclick: `closeModal(); navigate('/dashboard')` }
+            { text: 'Go to Dashboard', class: 'btn-secondary',onclick: `closeModal(); navigate('/dashboard')` }
         ]);
     }
 }
@@ -1421,16 +1452,17 @@ function renderLayout(content) {
                     </div>
                 </div>
                 <ul class="sidebar-menu">
-                    <li><a href="#/dashboard" class="${currentHash.includes('dashboard') ? 'active' : ''}">Dashboard</a></li>
-                    <li><a href="#/decks" class="${currentHash.includes('decks') || currentHash.includes('deck/') ? 'active' : ''}">My Decks</a></li>
-                    <li><a href="#/history" class="${currentHash.includes('history') ? 'active' : ''}">Study History</a></li>
-                    <li><a href="#/profile" class="${currentHash.includes('profile') ? 'active' : ''}">Profile</a></li>
-                    ${isAdmin ? `<li><a href="#/admin" class="${currentHash.includes('admin') ? 'active' : ''}">Admin Panel</a></li>` : ''}
-                    <li style="margin-top: 20px;"><a href="#/logout" style="color:#ff6b6b;">Logout</a></li>
+                    <li><a href="#/dashboard" class="${currentHash.includes('dashboard') ? 'active' : ''}">?? Dashboard</a></li>
+                    <li><a href="#/decks" class="${currentHash.includes('decks') || currentHash.includes('deck/') ? 'active' : ''}">?? My Decks</a></li>
+                    <li><a href="#/folders" class="${currentHash.includes('folder') ? 'active' : ''}">?? Folders</a></li>
+                    <li><a href="#/history" class="${currentHash.includes('history') ? 'active' : ''}">?? Study History</a></li>
+                    <li><a href="#/profile" class="${currentHash.includes('profile') ? 'active' : ''}">?? Profile</a></li>
+                    ${isAdmin ? `<li><a href="#/admin" class="${currentHash.includes('admin') ? 'active' : ''}">?? Admin Panel</a></li>` : ''}
+                    <li style="margin-top: 20px;"><a href="#/logout" style="color:#ff6b6b;">?? Logout</a></li>
                 </ul>
                 <div style="position: absolute; bottom: 20px; left: 20px; right: 20px; font-size: 0.75rem; opacity: 0.5; text-align: center;">
-                    <a href="/guide.html" target="_blank" style="color: white;">Guide</a> | 
-                    <a href="/test-api.html" target="_blank" style="color: white;">API Test</a>
+                    <a href="/guide.html" target="_blank" style="color: white;">?? Guide</a> | 
+                    <a href="/test-api.html" target="_blank" style="color: white;">?? API Test</a>
                 </div>
             </aside>
             <main class="main-content">

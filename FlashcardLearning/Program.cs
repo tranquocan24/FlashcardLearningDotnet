@@ -43,7 +43,12 @@ builder.Services.AddSwaggerGen(options =>
 
     options.OperationFilter<SecurityRequirementsOperationFilter>();
 });
-builder.Services.AddHttpClient<FlashcardLearning.Services.DictionaryService>();
+// Configure HttpClient for DictionaryService with timeout
+builder.Services.AddHttpClient<FlashcardLearning.Services.DictionaryService>(client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(5); // 5 second timeout
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

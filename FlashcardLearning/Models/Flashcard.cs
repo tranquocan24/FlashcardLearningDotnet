@@ -22,7 +22,7 @@ namespace FlashcardLearning.Models
         public Guid DeckId { get; set; }
 
         [JsonIgnore]
-        [ForeignKey("DeskId")]
+        [ForeignKey("DeckId")]
         public Deck? Deck { get; set; }
 
         public string? AudioUrl { get; set; }

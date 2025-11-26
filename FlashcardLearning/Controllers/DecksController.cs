@@ -21,7 +21,7 @@ namespace FlashcardLearning.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Deck>>> GetDecks()
+        public async Task<ActionResult<IEnumerable<DeckResponse>>> GetDecks()
         {
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var currentUserRole = User.FindFirstValue(ClaimTypes.Role);
@@ -36,13 +36,27 @@ namespace FlashcardLearning.Controllers
             {
                 query = query.Where(d => d.UserId.ToString() == currentUserId || d.IsPublic == true);
             }
-            return await query
+
+            var decks = await query
                 .OrderByDescending(d => d.CreatedAt)
+                .Select(d => new DeckResponse
+                {
+                    Id = d.Id,
+                    Title = d.Title,
+                    Description = d.Description,
+                    IsPublic = d.IsPublic,
+                    CreatedAt = d.CreatedAt,
+                    UserId = d.UserId,
+                    FolderId = d.FolderId,
+                    FlashcardCount = d.Flashcards != null ? d.Flashcards.Count : 0
+                })
                 .ToListAsync();
+
+            return Ok(decks);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Deck>> GetDeck(Guid id)
+        public async Task<ActionResult<DeckDetailResponse>> GetDeck(Guid id)
         {
             var deck = await _context.Decks
                                      .Include(d => d.Flashcards)
@@ -60,11 +74,32 @@ namespace FlashcardLearning.Controllers
                 return Forbid();
             }
 
-            return deck;
+            var response = new DeckDetailResponse
+            {
+                Id = deck.Id,
+                Title = deck.Title,
+                Description = deck.Description,
+                IsPublic = deck.IsPublic,
+                CreatedAt = deck.CreatedAt,
+                UserId = deck.UserId,
+                FolderId = deck.FolderId,
+                FlashcardCount = deck.Flashcards?.Count ?? 0,
+                Flashcards = deck.Flashcards?.Select(f => new FlashcardResponse
+                {
+                    Id = f.Id,
+                    Term = f.Term,
+                    Definition = f.Definition,
+                    Example = f.Example,
+                    ImageUrl = f.ImageUrl,
+                    AudioUrl = f.AudioUrl
+                }).ToList() ?? new List<FlashcardResponse>()
+            };
+
+            return Ok(response);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Deck>> CreateDeck(CreateDeckRequest request)
+        public async Task<ActionResult<DeckResponse>> CreateDeck(CreateDeckRequest request)
         {
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(currentUserId)) return Unauthorized();
@@ -99,7 +134,19 @@ namespace FlashcardLearning.Controllers
             _context.Decks.Add(deck);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetDeck), new { id = deck.Id }, deck);
+            var response = new DeckResponse
+            {
+                Id = deck.Id,
+                Title = deck.Title,
+                Description = deck.Description,
+                IsPublic = deck.IsPublic,
+                CreatedAt = deck.CreatedAt,
+                UserId = deck.UserId,
+                FolderId = deck.FolderId,
+                FlashcardCount = 0
+            };
+
+            return CreatedAtAction(nameof(GetDeck), new { id = deck.Id }, response);
         }
 
         [HttpPut("{id}")]

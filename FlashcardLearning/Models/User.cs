@@ -27,8 +27,7 @@ namespace FlashcardLearning.Models
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         public ICollection<Deck>? Decks { get; set; }
-        public ICollection<Folder>? Folders { get; set; }
+        public ICollection<Folder> Folders { get; set; } = new List<Folder>();
         public ICollection<StudySession>? StudySessions { get; set; }
-        public virtual ICollection<Folder> Folders { get; set; } = new List<Folder>();
     }
 }

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FlashcardLearning.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251125154538_InitialCreate")]
+    [Migration("20251126164625_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -38,6 +38,9 @@ namespace FlashcardLearning.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("FolderId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<bool>("IsPublic")
                         .HasColumnType("bit");
 
@@ -50,6 +53,8 @@ namespace FlashcardLearning.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("FolderId");
 
                     b.HasIndex("UserId");
 
@@ -90,6 +95,33 @@ namespace FlashcardLearning.Migrations
                     b.HasIndex("DeckId");
 
                     b.ToTable("Flashcards");
+                });
+
+            modelBuilder.Entity("FlashcardLearning.Models.Folder", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Folders");
                 });
 
             modelBuilder.Entity("FlashcardLearning.Models.StudySession", b =>
@@ -162,10 +194,16 @@ namespace FlashcardLearning.Migrations
 
             modelBuilder.Entity("FlashcardLearning.Models.Deck", b =>
                 {
+                    b.HasOne("FlashcardLearning.Models.Folder", "Folder")
+                        .WithMany("Decks")
+                        .HasForeignKey("FolderId");
+
                     b.HasOne("FlashcardLearning.Models.User", "Owner")
                         .WithMany("Decks")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Folder");
 
                     b.Navigation("Owner");
                 });
@@ -179,6 +217,17 @@ namespace FlashcardLearning.Migrations
                         .IsRequired();
 
                     b.Navigation("Deck");
+                });
+
+            modelBuilder.Entity("FlashcardLearning.Models.Folder", b =>
+                {
+                    b.HasOne("FlashcardLearning.Models.User", "User")
+                        .WithMany("Folders")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("FlashcardLearning.Models.StudySession", b =>
@@ -205,9 +254,16 @@ namespace FlashcardLearning.Migrations
                     b.Navigation("Flashcards");
                 });
 
+            modelBuilder.Entity("FlashcardLearning.Models.Folder", b =>
+                {
+                    b.Navigation("Decks");
+                });
+
             modelBuilder.Entity("FlashcardLearning.Models.User", b =>
                 {
                     b.Navigation("Decks");
+
+                    b.Navigation("Folders");
 
                     b.Navigation("StudySessions");
                 });

@@ -9,6 +9,7 @@ namespace FlashcardLearning.Models
         public DbSet<Deck> Decks { get; set; }
         public DbSet<Flashcard> Flashcards { get; set; }
         public DbSet<StudySession> StudySessions { get; set; }
+        public DbSet<Folder> Folders { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -40,6 +41,20 @@ namespace FlashcardLearning.Models
                 .WithMany()
                 .HasForeignKey(s => s.DeckId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // 4. User xóa -> Folder xóa theo (Cascade Delete)
+            modelBuilder.Entity<Folder>()
+                .HasOne(f => f.User)
+                .WithMany(u => u.Folders)
+                .HasForeignKey(f => f.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // 5. Folder xóa -> Deck KHÔNG xóa, chỉ set FolderId = NULL
+            modelBuilder.Entity<Deck>()
+                .HasOne(d => d.Folder)
+                .WithMany(f => f.Decks)
+                .HasForeignKey(d => d.FolderId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
         }
     }
 }

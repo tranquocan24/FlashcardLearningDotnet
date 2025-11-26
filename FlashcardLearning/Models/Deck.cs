@@ -25,5 +25,10 @@ namespace FlashcardLearning.Models
         public User? Owner { get; set; }
 
         public ICollection<Flashcard>? Flashcards { get; set; }
+        [Column("folder_id")]
+        public Guid? FolderId { get; set; } // Có dấu ? (Nullable)
+
+        [ForeignKey("FolderId")]
+        public virtual Folder? Folder { get; set; }
     }
 }

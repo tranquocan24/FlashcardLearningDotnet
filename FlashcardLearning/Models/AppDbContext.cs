@@ -52,27 +52,19 @@ namespace FlashcardLearning.Models
                 .HasForeignKey(s => s.DeckId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // ============================================
-            // 5. USER -> FOLDER (Cascade Delete)
-            // Khi xóa User -> xóa tất cả Folders của user đó
-            // ============================================
+            // 4. User xóa -> Folder xóa theo (Cascade Delete)
             modelBuilder.Entity<Folder>()
                 .HasOne(f => f.User)
                 .WithMany(u => u.Folders)
                 .HasForeignKey(f => f.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // ============================================
-            // 6. FOLDER -> DECK (SetNull)
-            // Khi xóa Folder -> các Deck bên trong KHÔNG bị xóa
-            // mà chỉ cập nhật FolderId về NULL
-            // ============================================
+            // 5. Folder xóa -> Deck KHÔNG xóa, chỉ set FolderId = NULL
             modelBuilder.Entity<Deck>()
                 .HasOne(d => d.Folder)
                 .WithMany(f => f.Decks)
                 .HasForeignKey(d => d.FolderId)
-                .OnDelete(DeleteBehavior.SetNull)
-                .IsRequired(false);
+                .OnDelete(DeleteBehavior.ClientSetNull);
         }
     }
 }

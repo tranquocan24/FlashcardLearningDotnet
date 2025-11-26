@@ -1,32 +1,23 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
+using System.ComponentModel.DataAnnotations;
 
-namespace FlashcardLearning.Models
+namespace FlashcardLearning.Models;
+
+public class Folder
 {
-    public class Folder
-    {
-        [Key]
-        public Guid Id { get; set; }
+    public Guid Id { get; set; }
 
-        [Required]
-        [MaxLength(200)]
-        public string Name { get; set; } = string.Empty;
+    [Required]
+    [MaxLength(200)]
+    public string Name { get; set; } = string.Empty;
 
-        [MaxLength(500)]
-        public string? Description { get; set; }
+    public string? Description { get; set; }
 
-        [Required]
-        public Guid UserId { get; set; }
+    [Required]
+    public Guid UserId { get; set; }
 
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        // Navigation Properties
-        [ForeignKey(nameof(UserId))]
-        [JsonIgnore]
-        public virtual User? User { get; set; }
-
-        // Một Folder chứa nhiều Decks
-        public virtual ICollection<Deck>? Decks { get; set; }
-    }
+    // Navigation Properties
+    public User? User { get; set; }
+    public ICollection<Deck> Decks { get; set; } = new List<Deck>();
 }

@@ -1,4 +1,5 @@
 ﻿using FlashcardLearning.Constants;
+using FlashcardLearning.DTOs;
 using FlashcardLearning.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -63,49 +64,79 @@ namespace FlashcardLearning.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Deck>> CreateDeck(Deck deck)
+        public async Task<ActionResult<Deck>> CreateDeck(CreateDeckRequest request)
         {
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            deck.UserId = Guid.Parse(currentUserId);
+            if (string.IsNullOrEmpty(currentUserId)) return Unauthorized();
 
-            deck.Id = Guid.NewGuid();
-            deck.CreatedAt = DateTime.Now;
-
-            if (deck.Flashcards != null)
+            // Kiểm tra FolderId nếu được cung cấp
+            if (request.FolderId.HasValue)
             {
-                foreach (var card in deck.Flashcards)
+                var folder = await _context.Folders.FindAsync(request.FolderId.Value);
+                if (folder == null)
                 {
-                    card.Id = Guid.NewGuid();
-                    card.DeckId = deck.Id;
+                    return BadRequest("Thư mục không tồn tại.");
+                }
+
+                // Kiểm tra folder có thuộc về user hiện tại không
+                if (folder.UserId.ToString() != currentUserId)
+                {
+                    return Forbid("Bạn không có quyền thêm deck vào thư mục này.");
                 }
             }
+
+            var deck = new Deck
+            {
+                Id = Guid.NewGuid(),
+                Title = request.Title,
+                Description = request.Description ?? string.Empty,
+                IsPublic = request.IsPublic,
+                UserId = Guid.Parse(currentUserId),
+                FolderId = request.FolderId,
+                CreatedAt = DateTime.UtcNow
+            };
 
             _context.Decks.Add(deck);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetDecks), new { id = deck.Id }, deck);
+            return CreatedAtAction(nameof(GetDeck), new { id = deck.Id }, deck);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateDeck(Guid id, Deck deckUpdate)
+        public async Task<IActionResult> UpdateDeck(Guid id, UpdateDeckRequest request)
         {
-            if (id != deckUpdate.Id) return BadRequest("ID không khớp.");
-
             var existingDeck = await _context.Decks.FindAsync(id);
             if (existingDeck == null) return NotFound("Không tìm thấy bộ thẻ.");
 
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var currentUserRole = User.FindFirstValue(ClaimTypes.Role);
 
-            // --- FIX: Cho phép nếu là Chủ sở hữu HOẶC là Admin ---
+            // Cho phép nếu là Chủ sở hữu HOẶC là Admin
             if (existingDeck.UserId.ToString() != currentUserId && currentUserRole != UserRoles.Admin)
             {
                 return Forbid();
             }
 
-            existingDeck.Title = deckUpdate.Title;
-            existingDeck.Description = deckUpdate.Description;
-            existingDeck.IsPublic = deckUpdate.IsPublic;
+            // Kiểm tra FolderId nếu được cung cấp
+            if (request.FolderId.HasValue)
+            {
+                var folder = await _context.Folders.FindAsync(request.FolderId.Value);
+                if (folder == null)
+                {
+                    return BadRequest("Thư mục không tồn tại.");
+                }
+
+                // Kiểm tra folder có thuộc về user hiện tại không
+                if (folder.UserId.ToString() != currentUserId && currentUserRole != UserRoles.Admin)
+                {
+                    return Forbid("Bạn không có quyền chuyển deck vào thư mục này.");
+                }
+            }
+
+            existingDeck.Title = request.Title;
+            existingDeck.Description = request.Description ?? string.Empty;
+            existingDeck.IsPublic = request.IsPublic;
+            existingDeck.FolderId = request.FolderId;
 
             try
             {

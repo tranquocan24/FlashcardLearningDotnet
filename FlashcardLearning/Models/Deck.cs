@@ -20,9 +20,15 @@ namespace FlashcardLearning.Models
 
         public Guid? UserId { get; set; }
 
+        public Guid? FolderId { get; set; }
+
         [JsonIgnore]
         [ForeignKey("UserId")]
         public User? Owner { get; set; }
+
+        [JsonIgnore]
+        [ForeignKey("FolderId")]
+        public Folder? Folder { get; set; }
 
         public ICollection<Flashcard>? Flashcards { get; set; }
         [Column("folder_id")]

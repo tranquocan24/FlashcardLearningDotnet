@@ -29,6 +29,27 @@ namespace FlashcardLearning.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Folders",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Folders", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Folders_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Decks",
                 columns: table => new
                 {
@@ -37,11 +58,17 @@ namespace FlashcardLearning.Migrations
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IsPublic = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    FolderId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Decks", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Decks_Folders_FolderId",
+                        column: x => x.FolderId,
+                        principalTable: "Folders",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Decks_Users_UserId",
                         column: x => x.UserId,
@@ -103,6 +130,11 @@ namespace FlashcardLearning.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Decks_FolderId",
+                table: "Decks",
+                column: "FolderId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Decks_UserId",
                 table: "Decks",
                 column: "UserId");
@@ -111,6 +143,11 @@ namespace FlashcardLearning.Migrations
                 name: "IX_Flashcards_DeckId",
                 table: "Flashcards",
                 column: "DeckId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Folders_UserId",
+                table: "Folders",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_StudySessions_DeckId",
@@ -134,6 +171,9 @@ namespace FlashcardLearning.Migrations
 
             migrationBuilder.DropTable(
                 name: "Decks");
+
+            migrationBuilder.DropTable(
+                name: "Folders");
 
             migrationBuilder.DropTable(
                 name: "Users");

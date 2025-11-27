@@ -1,226 +1,183 @@
 ﻿using FlashcardLearning.Constants;
 using FlashcardLearning.DTOs;
-using FlashcardLearning.Models;
+using FlashcardLearning.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace FlashcardLearning.Controllers
 {
+    /// <summary>
+    /// Thin controller for Deck operations
+    /// All business logic delegated to IDeckService
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
     public class DecksController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IDeckService _deckService;
 
-        public DecksController(AppDbContext context)
+        public DecksController(IDeckService deckService)
         {
-            _context = context;
+            _deckService = deckService;
         }
 
+        #region Helper Methods
+
+        private Guid GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return Guid.Parse(userIdClaim!);
+        }
+
+        private bool IsCurrentUserAdmin()
+        {
+            return User.FindFirstValue(ClaimTypes.Role) == UserRoles.Admin;
+        }
+
+        #endregion
+
+        #region Query Endpoints
+
+        /// <summary>
+        /// Get all decks accessible by current user
+        /// Admin: All decks, User: Own decks + Public decks
+        /// </summary>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DeckResponse>>> GetDecks()
         {
-            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var currentUserRole = User.FindFirstValue(ClaimTypes.Role);
-
-            if (string.IsNullOrEmpty(currentUserId)) return Unauthorized();
-
-            var query = _context.Decks
-                .Include(d => d.Flashcards)
-                .AsQueryable();
-
-            if (currentUserRole != UserRoles.Admin)
+            try
             {
-                query = query.Where(d => d.UserId.ToString() == currentUserId || d.IsPublic == true);
+                var userId = GetCurrentUserId();
+                var isAdmin = IsCurrentUserAdmin();
+                
+                var decks = await _deckService.GetDecksForUserAsync(userId, isAdmin);
+                
+                return Ok(decks);
             }
-
-            var decks = await query
-                .OrderByDescending(d => d.CreatedAt)
-                .Select(d => new DeckResponse
-                {
-                    Id = d.Id,
-                    Title = d.Title,
-                    Description = d.Description,
-                    IsPublic = d.IsPublic,
-                    CreatedAt = d.CreatedAt,
-                    UserId = d.UserId,
-                    FolderId = d.FolderId,
-                    FlashcardCount = d.Flashcards != null ? d.Flashcards.Count : 0
-                })
-                .ToListAsync();
-
-            return Ok(decks);
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred", details = ex.Message });
+            }
         }
 
+        /// <summary>
+        /// Get deck by ID with flashcards
+        /// </summary>
         [HttpGet("{id}")]
         public async Task<ActionResult<DeckDetailResponse>> GetDeck(Guid id)
         {
-            var deck = await _context.Decks
-                                     .Include(d => d.Flashcards)
-                                     .FirstOrDefaultAsync(d => d.Id == id);
-
-            if (deck == null) return NotFound();
-
-            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var currentUserRole = User.FindFirstValue(ClaimTypes.Role);
-
-            if (deck.IsPublic == false &&
-                deck.UserId.ToString() != currentUserId &&
-                currentUserRole != UserRoles.Admin)
+            try
             {
-                return Forbid();
+                var userId = GetCurrentUserId();
+                var isAdmin = IsCurrentUserAdmin();
+                
+                var deck = await _deckService.GetDeckByIdAsync(id, userId, isAdmin);
+                
+                if (deck == null)
+                    return NotFound(new { message = "Deck not found or access denied" });
+                
+                return Ok(deck);
             }
-
-            var response = new DeckDetailResponse
+            catch (Exception ex)
             {
-                Id = deck.Id,
-                Title = deck.Title,
-                Description = deck.Description,
-                IsPublic = deck.IsPublic,
-                CreatedAt = deck.CreatedAt,
-                UserId = deck.UserId,
-                FolderId = deck.FolderId,
-                FlashcardCount = deck.Flashcards?.Count ?? 0,
-                Flashcards = deck.Flashcards?.Select(f => new FlashcardResponse
-                {
-                    Id = f.Id,
-                    Term = f.Term,
-                    Definition = f.Definition,
-                    Example = f.Example,
-                    ImageUrl = f.ImageUrl,
-                    AudioUrl = f.AudioUrl
-                }).ToList() ?? new List<FlashcardResponse>()
-            };
-
-            return Ok(response);
+                return StatusCode(500, new { message = "An error occurred", details = ex.Message });
+            }
         }
 
+        #endregion
+
+        #region Command Endpoints
+
+        /// <summary>
+        /// Create new deck
+        /// </summary>
         [HttpPost]
         public async Task<ActionResult<DeckResponse>> CreateDeck(CreateDeckRequest request)
         {
-            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(currentUserId)) return Unauthorized();
-
-            // Kiểm tra FolderId nếu được cung cấp
-            if (request.FolderId.HasValue)
+            try
             {
-                var folder = await _context.Folders.FindAsync(request.FolderId.Value);
-                if (folder == null)
-                {
-                    return BadRequest("Thư mục không tồn tại.");
-                }
-
-                // Kiểm tra folder có thuộc về user hiện tại không
-                if (folder.UserId.ToString() != currentUserId)
-                {
-                    return Forbid("Bạn không có quyền thêm deck vào thư mục này.");
-                }
+                var userId = GetCurrentUserId();
+                
+                var deck = await _deckService.CreateDeckAsync(request, userId);
+                
+                return CreatedAtAction(nameof(GetDeck), new { id = deck.Id }, deck);
             }
-
-            var deck = new Deck
+            catch (InvalidOperationException ex)
             {
-                Id = Guid.NewGuid(),
-                Title = request.Title,
-                Description = request.Description ?? string.Empty,
-                IsPublic = request.IsPublic,
-                UserId = Guid.Parse(currentUserId),
-                FolderId = request.FolderId,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            _context.Decks.Add(deck);
-            await _context.SaveChangesAsync();
-
-            var response = new DeckResponse
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
             {
-                Id = deck.Id,
-                Title = deck.Title,
-                Description = deck.Description,
-                IsPublic = deck.IsPublic,
-                CreatedAt = deck.CreatedAt,
-                UserId = deck.UserId,
-                FolderId = deck.FolderId,
-                FlashcardCount = 0
-            };
-
-            return CreatedAtAction(nameof(GetDeck), new { id = deck.Id }, response);
+                return Forbid(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred", details = ex.Message });
+            }
         }
 
+        /// <summary>
+        /// Update existing deck
+        /// </summary>
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateDeck(Guid id, UpdateDeckRequest request)
         {
-            var existingDeck = await _context.Decks.FindAsync(id);
-            if (existingDeck == null) return NotFound("Không tìm thấy bộ thẻ.");
-
-            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var currentUserRole = User.FindFirstValue(ClaimTypes.Role);
-
-            // Cho phép nếu là Chủ sở hữu HOẶC là Admin
-            if (existingDeck.UserId.ToString() != currentUserId && currentUserRole != UserRoles.Admin)
-            {
-                return Forbid();
-            }
-
-            // Kiểm tra FolderId nếu được cung cấp
-            if (request.FolderId.HasValue)
-            {
-                var folder = await _context.Folders.FindAsync(request.FolderId.Value);
-                if (folder == null)
-                {
-                    return BadRequest("Thư mục không tồn tại.");
-                }
-
-                // Kiểm tra folder có thuộc về user hiện tại không
-                if (folder.UserId.ToString() != currentUserId && currentUserRole != UserRoles.Admin)
-                {
-                    return Forbid("Bạn không có quyền chuyển deck vào thư mục này.");
-                }
-            }
-
-            existingDeck.Title = request.Title;
-            existingDeck.Description = request.Description ?? string.Empty;
-            existingDeck.IsPublic = request.IsPublic;
-            existingDeck.FolderId = request.FolderId;
-
             try
             {
-                await _context.SaveChangesAsync();
+                var userId = GetCurrentUserId();
+                var isAdmin = IsCurrentUserAdmin();
+                
+                var success = await _deckService.UpdateDeckAsync(id, request, userId, isAdmin);
+                
+                if (!success)
+                    return NotFound(new { message = "Deck not found" });
+                
+                return NoContent();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (InvalidOperationException ex)
             {
-                if (!DeckExists(id)) return NotFound();
-                else throw;
+                return BadRequest(new { message = ex.Message });
             }
-
-            return NoContent();
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred", details = ex.Message });
+            }
         }
 
+        /// <summary>
+        /// Delete deck
+        /// </summary>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDeck(Guid id)
         {
-            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var currentUserRole = User.FindFirstValue(ClaimTypes.Role);
-
-            var deck = await _context.Decks.FindAsync(id);
-            if (deck == null) return NotFound();
-
-            if (deck.UserId.ToString() != currentUserId && currentUserRole != UserRoles.Admin)
+            try
             {
-                return Forbid();
+                var userId = GetCurrentUserId();
+                var isAdmin = IsCurrentUserAdmin();
+                
+                var success = await _deckService.DeleteDeckAsync(id, userId, isAdmin);
+                
+                if (!success)
+                    return NotFound(new { message = "Deck not found" });
+                
+                return NoContent();
             }
-
-            _context.Decks.Remove(deck);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred", details = ex.Message });
+            }
         }
 
-        private bool DeckExists(Guid id)
-        {
-            return _context.Decks.Any(e => e.Id == id);
-        }
+        #endregion
     }
 }

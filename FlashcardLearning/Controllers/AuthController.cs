@@ -1,9 +1,8 @@
 ﻿using FlashcardLearning.Constants;
 using FlashcardLearning.DTOs;
-using FlashcardLearning.Models;
+using FlashcardLearning.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -15,81 +14,41 @@ namespace FlashcardLearning.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IAuthService _authService;
         private readonly IConfiguration _configuration;
 
-        public AuthController(AppDbContext context, IConfiguration configuration)
+        public AuthController(IAuthService authService, IConfiguration configuration)
         {
-            _context = context;
+            _authService = authService;
             _configuration = configuration;
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<User>> Register(RegisterDto request)
+        public async Task<ActionResult> Register(RegisterDto request)
         {
-            if (await _context.Users.AnyAsync(u => u.Email == request.Email))
+            try
             {
-                return BadRequest("Email was already exist");
+                var result = await _authService.RegisterAsync(request);
+                return Ok(result);
             }
-
-            string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
-
-            var user = new User
+            catch (InvalidOperationException ex)
             {
-                Id = Guid.NewGuid(),
-                Username = request.Username,
-                Email = request.Email,
-                Password = passwordHash,
-                Role = UserRoles.User
-            };
-
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            return Ok(new { message = "Registration successful!", userId = user.Id });
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<string>> Login(LoginDto request)
+        public async Task<ActionResult> Login(LoginDto request)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
-            if (user == null)
+            try
             {
-                return BadRequest("Email or password is wrong");
+                var result = await _authService.LoginAsync(request);
+                return Ok(result);
             }
-
-            if (!BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
+            catch (UnauthorizedAccessException ex)
             {
-                return BadRequest("Email or password is wrong");
+                return BadRequest(ex.Message);
             }
-
-            string token = CreateToken(user);
-
-            return Ok(new { token, username = user.Username, role = user.Role, userId = user.Id });
-        }
-
-        private string CreateToken(User user)
-        {
-            List<Claim> claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role)
-            };
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
-                _configuration.GetSection("AppSettings:SecretKey").Value!));
-
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
-
-            var token = new JwtSecurityToken(
-                claims: claims,
-                expires: DateTime.Now.AddDays(1),
-                signingCredentials: creds
-            );
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }

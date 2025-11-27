@@ -11,6 +11,7 @@ namespace FlashcardLearning.Models
         public DbSet<Flashcard> Flashcards { get; set; }
         public DbSet<StudySession> StudySessions { get; set; }
         public DbSet<Folder> Folders { get; set; }
+        public DbSet<DictionaryEntry> DictionaryEntries { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -65,6 +66,13 @@ namespace FlashcardLearning.Models
                 .WithMany(f => f.Decks)
                 .HasForeignKey(d => d.FolderId)
                 .OnDelete(DeleteBehavior.ClientSetNull);
+
+            // ============================================
+            // 6. DICTIONARY ENTRY - Unique Word
+            // ============================================
+            modelBuilder.Entity<DictionaryEntry>()
+                .HasIndex(d => d.Word)
+                .IsUnique();
         }
     }
 }

@@ -440,6 +440,62 @@ async function deleteDeck(deckId) {
 // ============================
 let currentDeckId = null;
 
+// ============================
+// DEBOUNCE UTILITY
+// ============================
+function debounce(func, delay) {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), delay);
+    };
+}
+
+// ============================
+// AUTO-TRANSLATION LOOKUP
+// ============================
+async function lookupWord(word) {
+    if (!word || word.trim().length === 0) return;
+    
+    try {
+        // Hi?n th? loading indicator
+        const definitionInput = document.getElementById('cardDefinition');
+        if (!definitionInput) return;
+        
+        // Ch? g?i ý n?u ô Definition ?ang R?NG
+        if (definitionInput.value && definitionInput.value.trim() !== '') {
+            return;
+        }
+        
+        // Thêm placeholder ?? báo ?ang loading
+        const originalPlaceholder = definitionInput.placeholder;
+        definitionInput.placeholder = '? ?ang tra c?u...';
+        
+        const data = await apiCall(`/Dictionary/lookup?word=${encodeURIComponent(word.trim())}`);
+        
+        // Restore placeholder
+        definitionInput.placeholder = originalPlaceholder;
+        
+        if (data && data.success && data.meaning) {
+            // Ch? ?i?n n?u ô v?n ?ang R?NG (user ch?a nh?p gì)
+            if (!definitionInput.value || definitionInput.value.trim() === '') {
+                definitionInput.value = data.meaning;
+                definitionInput.style.borderColor = '#28a745'; // Green border
+                
+                // Reset border after 2s
+                setTimeout(() => {
+                    definitionInput.style.borderColor = '';
+                }, 2000);
+            }
+        }
+    } catch (error) {
+        console.error('Translation lookup error:', error);
+    }
+}
+
+// Debounced version (1 second delay)
+const debouncedLookup = debounce(lookupWord, 1000);
+
 async function renderDeckDetail(params) {
     const deckId = params.get('id');
     if (!deckId) {
@@ -513,12 +569,13 @@ async function refreshDeckDetail() {
 function showCreateFlashcardModal(deckId) {
     const modalContent = `
         <div class="form-group">
-            <label>Term *</label>
+            <label>Term (Ti?ng Anh) *</label>
             <input type="text" id="cardTerm" placeholder="e.g. Hello">
+            <small class="text-muted">?? Nh?p t? ti?ng Anh và ??i 1 giây, h? th?ng s? t? ??ng g?i ý ngh?a</small>
         </div>
         <div class="form-group">
-            <label>Definition *</label>
-            <input type="text" id="cardDefinition" placeholder="e.g. A greeting">
+            <label>Definition (Ngh?a Ti?ng Vi?t) *</label>
+            <input type="text" id="cardDefinition" placeholder="e.g. Xin chào">
         </div>
         <div class="form-group">
             <label>Example</label>
@@ -529,7 +586,7 @@ function showCreateFlashcardModal(deckId) {
             <input type="text" id="cardImageUrl" placeholder="https://example.com/image.jpg">
         </div>
         <div class="alert alert-info">
-            <small>Audio will be auto-generated from Term if available</small>
+            <small>? Audio s? t? ??ng t?o t? Term (n?u có trong t? ?i?n)</small>
         </div>
     `;
     
@@ -537,6 +594,21 @@ function showCreateFlashcardModal(deckId) {
         { text: 'Cancel', class: 'btn-secondary', onclick: 'closeModal()' },
         { text: 'Create', class: 'btn-primary', onclick: `createFlashcard('${deckId}')` }
     ]);
+    
+    // ==============================
+    // ATTACH AUTO-TRANSLATION LISTENER
+    // ==============================
+    setTimeout(() => {
+        const termInput = document.getElementById('cardTerm');
+        if (termInput) {
+            termInput.addEventListener('input', (e) => {
+                const word = e.target.value;
+                if (word && word.trim().length > 0) {
+                    debouncedLookup(word);
+                }
+            });
+        }
+    }, 100); // ??i modal render xong
 }
 
 async function showEditFlashcardModal(cardId, deckId) {
@@ -1239,7 +1311,7 @@ function renderStudyStats(sessions) {
                         ? (modeSessions.reduce((sum, s) => sum + (s.score / s.totalCards * 100), 0) / count).toFixed(1)
                         : 0;
                     return `<li>${mode}: ${count} sessions (${avgScore}% average)</li>`;
-                }).join('')}
+                }).join('')}}
             </ul>
         </div>
     `;

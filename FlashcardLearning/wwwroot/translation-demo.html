@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto-Translation Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .alert-info {
+            background: #e3f2fd;
+            color: #1976d2;
+            border-left: 4px solid #1976d2;
+        }
+        
+        .alert-success {
+            background: #e8f5e9;
+            color: #388e3c;
+            border-left: 4px solid #388e3c;
+        }
+        
+        .alert-error {
+            background: #ffebee;
+            color: #c62828;
+            border-left: 4px solid #c62828;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        input[type="text"].loading {
+            border-color: #ff9800;
+            background: #fff3e0;
+        }
+        
+        input[type="text"].success {
+            border-color: #4caf50;
+            animation: successPulse 0.6s;
+        }
+        
+        @keyframes successPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        
+        .hint {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+        
+        .demo-words {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .demo-word {
+            background: #f5f5f5;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .demo-word:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 20px;
+            background: #f5f5f5;
+            font-size: 14px;
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid #ff9800;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .features {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        
+        .features h3 {
+            margin-bottom: 12px;
+            color: #667eea;
+        }
+        
+        .features ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .features li {
+            padding: 6px 0;
+            font-size: 14px;
+        }
+        
+        .features li::before {
+            content: "? ";
+            margin-right: 8px;
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>?? Auto-Translation Demo</h1>
+        <p class="subtitle">G?i ý d?ch t? ??ng En ? Vi</p>
+        
+        <div class="alert alert-info">
+            <strong>?? H??ng d?n:</strong> Nh?p t? ti?ng Anh bên d??i và ??i 1 giây. 
+            Ngh?a ti?ng Vi?t s? t? ??ng xu?t hi?n!
+        </div>
+        
+        <div class="form-group">
+            <label>?? Term (Ti?ng Anh)</label>
+            <input type="text" id="termInput" placeholder="Ví d?: hello">
+            <p class="hint">Nh?p t? và ??i 1 giây ?? xem magic ?</p>
+            <div class="demo-words">
+                <span class="demo-word" onclick="fillWord('hello')">hello</span>
+                <span class="demo-word" onclick="fillWord('world')">world</span>
+                <span class="demo-word" onclick="fillWord('computer')">computer</span>
+                <span class="demo-word" onclick="fillWord('book')">book</span>
+                <span class="demo-word" onclick="fillWord('beautiful')">beautiful</span>
+                <span class="demo-word" onclick="fillWord('friend')">friend</span>
+                <span class="demo-word" onclick="fillWord('study')">study</span>
+                <span class="demo-word" onclick="fillWord('happy')">happy</span>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label>???? Definition (Ngh?a Ti?ng Vi?t)</label>
+            <input type="text" id="definitionInput" placeholder="S? t? ??ng xu?t hi?n...">
+            <p class="hint">Ô này s? t? ??ng ???c ?i?n (n?u r?ng)</p>
+        </div>
+        
+        <button class="btn" onclick="clearInputs()">?? Clear & Try Again</button>
+        
+        <div class="status" id="status" style="display: none;">
+            <div class="status-item">
+                <span>?? Tr?ng thái:</span>
+                <span id="statusText">?ang ch?...</span>
+            </div>
+            <div class="status-item">
+                <span>?? T? tra:</span>
+                <span id="lookupWord">-</span>
+            </div>
+            <div class="status-item">
+                <span>? Response time:</span>
+                <span id="responseTime">-</span>
+            </div>
+            <div class="status-item">
+                <span>?? Cache:</span>
+                <span id="cacheStatus">-</span>
+            </div>
+        </div>
+        
+        <div class="features">
+            <h3>? Tính n?ng</h3>
+            <ul>
+                <li>Debounce 1 giây (tránh spam API)</li>
+                <li>Cache-first strategy (nhanh h?n l?n 2)</li>
+                <li>Loading indicator (? ?ang tra c?u...)</li>
+                <li>Ch? ?i?n n?u ô Definition r?ng</li>
+                <li>Green border khi thành công</li>
+                <li>T? ??ng l?u vào Database</li>
+            </ul>
+        </div>
+        
+        <div class="alert alert-error" style="margin-top: 20px;">
+            <strong>?? L?u ý:</strong> Demo này c?n Backend ch?y t?i 
+            <code>https://localhost:5001</code> và ph?i ??ng nh?p ?? l?y JWT Token.
+        </div>
+    </div>
+    
+    <script>
+        // ============================
+        // CONFIG
+        // ============================
+        const API_URL = '/api';
+        
+        // Get token from localStorage (assuming user is logged in)
+        function getToken() {
+            return localStorage.getItem('token');
+        }
+        
+        // ============================
+        // DEBOUNCE FUNCTION
+        // ============================
+        function debounce(func, delay) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), delay);
+            };
+        }
+        
+        // ============================
+        // LOOKUP WORD FUNCTION
+        // ============================
+        async function lookupWord(word) {
+            if (!word || word.trim().length === 0) return;
+            
+            const definitionInput = document.getElementById('definitionInput');
+            const status = document.getElementById('status');
+            const statusText = document.getElementById('statusText');
+            const lookupWordSpan = document.getElementById('lookupWord');
+            const responseTimeSpan = document.getElementById('responseTime');
+            const cacheStatusSpan = document.getElementById('cacheStatus');
+            
+            // Ch? lookup n?u Definition r?ng
+            if (definitionInput.value && definitionInput.value.trim() !== '') {
+                return;
+            }
+            
+            // Show status
+            status.style.display = 'block';
+            statusText.innerHTML = '<span class="spinner"></span> ?ang tra c?u...';
+            lookupWordSpan.textContent = word;
+            responseTimeSpan.textContent = '-';
+            cacheStatusSpan.textContent = '-';
+            
+            // Loading state
+            definitionInput.placeholder = '? ?ang tra c?u...';
+            definitionInput.classList.add('loading');
+            
+            const startTime = Date.now();
+            
+            try {
+                const token = getToken();
+                
+                if (!token) {
+                    throw new Error('Ch?a ??ng nh?p. Vui lòng login tr??c!');
+                }
+                
+                const response = await fetch(`${API_URL}/Dictionary/lookup?word=${encodeURIComponent(word.trim())}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const endTime = Date.now();
+                const elapsed = endTime - startTime;
+                
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Update status
+                responseTimeSpan.textContent = `${elapsed}ms`;
+                
+                if (data && data.success && data.meaning) {
+                    // Fill definition if still empty
+                    if (!definitionInput.value || definitionInput.value.trim() === '') {
+                        definitionInput.value = data.meaning;
+                        definitionInput.classList.remove('loading');
+                        definitionInput.classList.add('success');
+                        
+                        statusText.innerHTML = '? Thành công!';
+                        cacheStatusSpan.textContent = elapsed < 50 ? 'Hit (from DB)' : 'Miss (from API)';
+                        
+                        // Reset success state after 2s
+                        setTimeout(() => {
+                            definitionInput.classList.remove('success');
+                        }, 2000);
+                    }
+                } else {
+                    statusText.innerHTML = '?? Không tìm th?y ngh?a';
+                    cacheStatusSpan.textContent = 'N/A';
+                }
+                
+                definitionInput.placeholder = 'S? t? ??ng xu?t hi?n...';
+                definitionInput.classList.remove('loading');
+                
+            } catch (error) {
+                console.error('Lookup error:', error);
+                definitionInput.placeholder = 'L?i: ' + error.message;
+                definitionInput.classList.remove('loading');
+                
+                statusText.innerHTML = '? L?i: ' + error.message;
+                responseTimeSpan.textContent = '-';
+                cacheStatusSpan.textContent = '-';
+            }
+        }
+        
+        // Create debounced version
+        const debouncedLookup = debounce(lookupWord, 1000);
+        
+        // ============================
+        // EVENT LISTENERS
+        // ============================
+        document.getElementById('termInput').addEventListener('input', (e) => {
+            const word = e.target.value;
+            if (word && word.trim().length > 0) {
+                debouncedLookup(word);
+            }
+        });
+        
+        // ============================
+        // HELPER FUNCTIONS
+        // ============================
+        function fillWord(word) {
+            document.getElementById('termInput').value = word;
+            document.getElementById('termInput').dispatchEvent(new Event('input'));
+        }
+        
+        function clearInputs() {
+            document.getElementById('termInput').value = '';
+            document.getElementById('definitionInput').value = '';
+            document.getElementById('status').style.display = 'none';
+            document.getElementById('definitionInput').classList.remove('loading', 'success');
+            document.getElementById('definitionInput').placeholder = 'S? t? ??ng xu?t hi?n...';
+        }
+        
+        // Check if user is logged in
+        window.addEventListener('load', () => {
+            const token = getToken();
+            if (!token) {
+                const alert = document.createElement('div');
+                alert.className = 'alert alert-error';
+                alert.innerHTML = '<strong>? L?i:</strong> B?n ch?a ??ng nh?p. Vui lòng <a href="/index.html" style="color:#c62828; font-weight:bold;">Login t?i ?ây</a> tr??c!';
+                document.querySelector('.container').insertBefore(alert, document.querySelector('.form-group'));
+            }
+        });
+    </script>
+</body>
+</html>

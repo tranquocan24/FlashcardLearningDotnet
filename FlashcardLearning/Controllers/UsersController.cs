@@ -1,9 +1,9 @@
 ﻿using FlashcardLearning.Constants;
 using FlashcardLearning.DTOs;
 using FlashcardLearning.Models;
+using FlashcardLearning.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace FlashcardLearning.Controllers
@@ -13,52 +13,47 @@ namespace FlashcardLearning.Controllers
     [Authorize]
     public class UsersController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IUserService _userService;
 
-        public UsersController(AppDbContext context)
+        public UsersController(IUserService userService)
         {
-            _context = context;
+            _userService = userService;
         }
 
         [HttpGet("profile")]
         public async Task<ActionResult<object>> GetProfile()
         {
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            
+            if (string.IsNullOrEmpty(currentUserId)) return Unauthorized();
 
-            var user = await _context.Users
-                .Include(u => u.Decks)
-                .FirstOrDefaultAsync(u => u.Id.ToString() == currentUserId);
-
-            if (user == null) return NotFound();
-
-            return Ok(new
+            var profile = await _userService.GetProfileAsync(Guid.Parse(currentUserId));
+            
+            if (profile == null)
             {
-                user.Id,
-                user.Username,
-                user.Email,
-                user.Role,
-                user.AvatarUrl,
-                user.CreatedAt,
-                DeckCount = user.Decks?.Count ?? 0
-            });
+                return NotFound();
+            }
+
+            return Ok(profile);
         }
 
         [HttpPut("profile")]
         public async Task<IActionResult> UpdateProfile(User userUpdate)
         {
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var user = await _context.Users.FindAsync(Guid.Parse(currentUserId));
+            
+            if (string.IsNullOrEmpty(currentUserId)) return Unauthorized();
 
-            if (user == null) return NotFound();
+            var success = await _userService.UpdateProfileAsync(
+                Guid.Parse(currentUserId), 
+                userUpdate.Username, 
+                userUpdate.AvatarUrl);
 
-            user.AvatarUrl = userUpdate.AvatarUrl;
-
-            if (!string.IsNullOrEmpty(userUpdate.Username))
+            if (!success)
             {
-                user.Username = userUpdate.Username;
+                return NotFound();
             }
 
-            await _context.SaveChangesAsync();
             return NoContent();
         }
 
@@ -66,62 +61,72 @@ namespace FlashcardLearning.Controllers
         public async Task<IActionResult> ChangePassword(ChangePasswordDto request)
         {
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var user = await _context.Users.FindAsync(Guid.Parse(currentUserId));
+            
+            if (string.IsNullOrEmpty(currentUserId)) return Unauthorized();
 
-            if (user == null) return NotFound();
-
-            if (!BCrypt.Net.BCrypt.Verify(request.OldPassword, user.Password))
+            try
             {
-                return BadRequest("Mật khẩu cũ không chính xác.");
+                var success = await _userService.ChangePasswordAsync(
+                    Guid.Parse(currentUserId), 
+                    request.OldPassword, 
+                    request.NewPassword);
+
+                if (!success)
+                {
+                    return NotFound();
+                }
+
+                return Ok(new { message = "Đổi mật khẩu thành công!" });
             }
-
-            string newPasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
-            user.Password = newPasswordHash;
-
-            await _context.SaveChangesAsync();
-
-            return Ok(new { message = "Đổi mật khẩu thành công!" });
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
-        //Admin
+        // Admin
         [HttpGet]
         public async Task<ActionResult<IEnumerable<object>>> GetAllUsers()
         {
             var role = User.FindFirstValue(ClaimTypes.Role);
-            if (role != UserRoles.Admin) return Forbid();
+            
+            if (role != UserRoles.Admin)
+            {
+                return Forbid();
+            }
 
-            return await _context.Users
-                .Select(u => new
-                {
-                    u.Id,
-                    u.Username,
-                    u.Email,
-                    u.Role,
-                    u.CreatedAt
-                })
-                .ToListAsync();
+            var users = await _userService.GetAllUsersAsync();
+            return Ok(users);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(Guid id)
         {
             var role = User.FindFirstValue(ClaimTypes.Role);
-            if (role != UserRoles.Admin) return Forbid();
-
-            var user = await _context.Users.FindAsync(id);
-            if (user == null) return NotFound();
-
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (user.Id.ToString() == currentUserId)
+            
+            if (role != UserRoles.Admin)
             {
-                return BadRequest("Bạn không thể tự xóa tài khoản của chính mình.");
+                return Forbid();
             }
 
-            _context.Users.Remove(user);
+            if (string.IsNullOrEmpty(currentUserId)) return Unauthorized();
 
-            await _context.SaveChangesAsync();
+            try
+            {
+                var success = await _userService.DeleteUserAsync(id, Guid.Parse(currentUserId));
+                
+                if (!success)
+                {
+                    return NotFound();
+                }
 
-            return NoContent();
+                return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

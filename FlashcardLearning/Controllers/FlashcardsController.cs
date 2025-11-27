@@ -3,8 +3,6 @@ using FlashcardLearning.Models;
 using FlashcardLearning.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.Design;
 using System.Security.Claims;
 
 namespace FlashcardLearning.Controllers
@@ -14,102 +12,66 @@ namespace FlashcardLearning.Controllers
     [Authorize]
     public class FlashcardsController : ControllerBase
     {
-        private readonly AppDbContext _context;
-        private readonly DictionaryService _dictionaryService;
+        private readonly IFlashcardService _flashcardService;
         private readonly ILogger<FlashcardsController> _logger;
 
-        public FlashcardsController(AppDbContext context, DictionaryService dictionaryService, ILogger<FlashcardsController> logger)
+        public FlashcardsController(IFlashcardService flashcardService, ILogger<FlashcardsController> logger)
         {
-            _context = context;
-            _dictionaryService = dictionaryService;
+            _flashcardService = flashcardService;
             _logger = logger;
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Flashcard>> GetFlashcard(Guid id)
         {
-            var card = await _context.Flashcards
-                                     .Include(f => f.Deck)
-                                     .FirstOrDefaultAsync(f => f.Id == id);
-
-            if (card == null) return NotFound("Flashcard not found.");
-
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var currentUserRole = User.FindFirstValue(ClaimTypes.Role);
+            
+            if (string.IsNullOrEmpty(currentUserId)) return Unauthorized();
 
-            if (card.Deck != null &&
-                !card.Deck.IsPublic &&
-                card.Deck.UserId.ToString() != currentUserId &&
-                currentUserRole != UserRoles.Admin)
+            try
             {
-                return Forbid();
-            }
+                bool isAdmin = currentUserRole == UserRoles.Admin;
+                var flashcard = await _flashcardService.GetFlashcardAsync(id, Guid.Parse(currentUserId), isAdmin);
 
-            return card;
+                if (flashcard == null)
+                {
+                    return NotFound("Flashcard not found.");
+                }
+
+                return Ok(flashcard);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid(ex.Message);
+            }
         }
 
         [HttpPost]
         public async Task<ActionResult<Flashcard>> CreateFlashcard(Flashcard flashcard)
         {
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var currentUserRole = User.FindFirstValue(ClaimTypes.Role);
+            
+            if (string.IsNullOrEmpty(currentUserId)) return Unauthorized();
+
             try
             {
-                _logger.LogInformation("Creating flashcard with term: {Term}", flashcard.Term);
+                bool isAdmin = currentUserRole == UserRoles.Admin;
+                var createdFlashcard = await _flashcardService.CreateFlashcardAsync(
+                    flashcard, 
+                    Guid.Parse(currentUserId), 
+                    isAdmin);
 
-                // Validate deck exists
-                var deck = await _context.Decks.FindAsync(flashcard.DeckId);
-                if (deck == null)
-                {
-                    return NotFound("Deck not found.");
-                }
-
-                // Check permissions
-                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                var currentUserRole = User.FindFirstValue(ClaimTypes.Role);
-
-                if (deck.UserId?.ToString() != currentUserId && currentUserRole != UserRoles.Admin)
-                {
-                    return Forbid();
-                }
-
-                // Prepare data
-                flashcard.Id = Guid.NewGuid();
-                flashcard.Example = flashcard.Example ?? "";
-                flashcard.ImageUrl = flashcard.ImageUrl ?? "";
-
-                // Auto-generate audio (with timeout protection)
-                if (string.IsNullOrEmpty(flashcard.AudioUrl))
-                {
-                    try
-                    {
-                        _logger.LogInformation("Fetching audio for term: {Term}", flashcard.Term);
-                        
-                        string? autoAudioUrl = await _dictionaryService.GetAudioUrlAsync(flashcard.Term);
-                        flashcard.AudioUrl = autoAudioUrl ?? "";
-                        
-                        if (!string.IsNullOrEmpty(autoAudioUrl))
-                        {
-                            _logger.LogInformation("Audio found for term: {Term}", flashcard.Term);
-                        }
-                        else
-                        {
-                            _logger.LogInformation("No audio found for term: {Term}", flashcard.Term);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        // Don't fail the whole request if audio fetch fails
-                        _logger.LogWarning(ex, "Failed to fetch audio for term: {Term}", flashcard.Term);
-                        flashcard.AudioUrl = "";
-                    }
-                }
-
-                // Save to database
-                _context.Flashcards.Add(flashcard);
-                await _context.SaveChangesAsync();
-
-                _logger.LogInformation("Flashcard created successfully with ID: {Id}", flashcard.Id);
-
-                return CreatedAtAction(nameof(GetFlashcard), new { id = flashcard.Id }, flashcard);
+                return CreatedAtAction(nameof(GetFlashcard), new { id = createdFlashcard.Id }, createdFlashcard);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid(ex.Message);
             }
             catch (Exception ex)
             {
@@ -121,70 +83,64 @@ namespace FlashcardLearning.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateFlashcard(Guid id, Flashcard flashcardUpdate)
         {
-            if (id != flashcardUpdate.Id) return BadRequest("ID mismatch.");
-
-            var existingCard = await _context.Flashcards
-                                             .Include(f => f.Deck)
-                                             .FirstOrDefaultAsync(f => f.Id == id);
-
-            if (existingCard == null) return NotFound("Flashcard not found.");
-
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var currentUserRole = User.FindFirstValue(ClaimTypes.Role);
-
-            if (existingCard.Deck != null &&
-                existingCard.Deck.UserId.ToString() != currentUserId &&
-                currentUserRole != UserRoles.Admin)
-            {
-                return Forbid();
-            }
-
-            existingCard.Term = flashcardUpdate.Term;
-            existingCard.Definition = flashcardUpdate.Definition;
-            existingCard.Example = flashcardUpdate.Example;
-            existingCard.ImageUrl = flashcardUpdate.ImageUrl;
+            
+            if (string.IsNullOrEmpty(currentUserId)) return Unauthorized();
 
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!FlashcardExists(id)) return NotFound();
-                else throw;
-            }
+                bool isAdmin = currentUserRole == UserRoles.Admin;
+                var success = await _flashcardService.UpdateFlashcardAsync(
+                    id, 
+                    flashcardUpdate, 
+                    Guid.Parse(currentUserId), 
+                    isAdmin);
 
-            return NoContent();
+                if (!success)
+                {
+                    return NotFound("Flashcard not found.");
+                }
+
+                return NoContent();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid(ex.Message);
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteFlashcard(Guid id)
         {
-            var card = await _context.Flashcards
-                                     .Include(f => f.Deck)
-                                     .FirstOrDefaultAsync(f => f.Id == id);
-
-            if (card == null) return NotFound("Flashcard not found.");
-
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var currentUserRole = User.FindFirstValue(ClaimTypes.Role);
+            
+            if (string.IsNullOrEmpty(currentUserId)) return Unauthorized();
 
-            if (card.Deck != null &&
-                card.Deck.UserId.ToString() != currentUserId &&
-                currentUserRole != UserRoles.Admin)
+            try
             {
-                return Forbid();
+                bool isAdmin = currentUserRole == UserRoles.Admin;
+                var success = await _flashcardService.DeleteFlashcardAsync(
+                    id, 
+                    Guid.Parse(currentUserId), 
+                    isAdmin);
+
+                if (!success)
+                {
+                    return NotFound("Flashcard not found.");
+                }
+
+                return NoContent();
             }
-
-            _context.Flashcards.Remove(card);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool FlashcardExists(Guid id)
-        {
-            return _context.Flashcards.Any(e => e.Id == id);
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid(ex.Message);
+            }
         }
     }
 }

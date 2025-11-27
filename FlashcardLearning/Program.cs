@@ -1,4 +1,6 @@
 ﻿using FlashcardLearning.Models;
+using FlashcardLearning.Repositories;
+using FlashcardLearning.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -9,11 +11,37 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// ============================
+// DATABASE CONTEXT
+// ============================
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DBConnection")));
 
-// Configure JSON serialization options
+// ============================
+// REPOSITORIES (Data Access Layer)
+// ============================
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddScoped<IDeckRepository, DeckRepository>();
+builder.Services.AddScoped<IFolderRepository, FolderRepository>();
+builder.Services.AddScoped<IFlashcardRepository, FlashcardRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IStudySessionRepository, StudySessionRepository>();
+builder.Services.AddScoped<IDictionaryRepository, DictionaryRepository>();
+
+// ============================
+// SERVICES (Business Logic Layer)
+// ============================
+builder.Services.AddScoped<IDeckService, DeckService>();
+builder.Services.AddScoped<IFolderService, FolderService>();
+builder.Services.AddScoped<IFlashcardService, FlashcardService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IStudySessionService, StudySessionService>();
+builder.Services.AddScoped<IDictionaryService, DictionaryService>();
+
+// ============================
+// CONTROLLERS & JSON OPTIONS
+// ============================
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -21,6 +49,9 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     });
 
+// ============================
+// AUTHENTICATION (JWT)
+// ============================
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -33,11 +64,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = false
         };
     });
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+// ============================
+// SWAGGER DOCUMENTATION
+// ============================
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new OpenApiInfo { Title = "My Flashcard App API", Version = "v1" });
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Flashcard Learning API", Version = "v1" });
 
     options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
     {
@@ -51,15 +85,20 @@ builder.Services.AddSwaggerGen(options =>
 
     options.OperationFilter<SecurityRequirementsOperationFilter>();
 });
-// Configure HttpClient for DictionaryService with timeout
-builder.Services.AddHttpClient<FlashcardLearning.Services.DictionaryService>(client =>
+
+// ============================
+// HTTP CLIENT (for external APIs)
+// ============================
+builder.Services.AddHttpClient<IDictionaryService, DictionaryService>(client =>
 {
-    client.Timeout = TimeSpan.FromSeconds(5); // 5 second timeout
+    client.Timeout = TimeSpan.FromSeconds(5);
 });
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// ============================
+// MIDDLEWARE PIPELINE
+// ============================
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

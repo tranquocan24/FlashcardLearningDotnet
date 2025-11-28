@@ -275,7 +275,7 @@ async function renderDecks() {
         </div>
         
         ${!decks || decks.length === 0 ? 
-            renderEmptyState('??', 'No decks yet', 'Create your first deck to start learning!') :
+            renderEmptyState( 'No decks yet', 'Create your first deck to start learning!') :
             `<div class="deck-grid">
                 ${decks.map(deck => `
                     <div class="deck-item" onclick="navigate('/deck/${deck.id}')">
@@ -516,7 +516,7 @@ async function renderDeckDetail(params) {
     const content = `
         <div class="page-header">
             <div>
-                <a href="#/decks" class="link">? Back</a>
+                <a href="#/decks" class="link">Back</a>
                 <h1>${deck.title}</h1>
                 <p class="text-muted">${deck.description || 'No description'}</p>
             </div>
@@ -732,7 +732,7 @@ async function renderStudy(params) {
     const content = `
         <div class="page-header">
             <div>
-                <a href="#/deck/${deckId}" class="link">? Back</a>
+                <a href="#/deck/${deckId}" class="link">Back</a>
                 <h1>Study: ${deck.title}</h1>
             </div>
         </div>
@@ -1031,7 +1031,7 @@ async function finishStudySession(mode, score, total) {
     
     if (data) {
         const percentage = ((score / total) * 100).toFixed(0);
-        const emoji = percentage >= 80 ? '??' : percentage >= 50 ? '??' : '??';
+        const emoji = percentage >= 80 ? 'exellent' : percentage >= 50 ? 'good' : 'bad';
         const message = `
             <div class="text-center">
                 <h2 style="font-size: 3rem; margin-bottom: 20px;">${emoji}</h2>

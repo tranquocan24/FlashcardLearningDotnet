@@ -117,7 +117,7 @@ async function renderFolderDetail(params) {
     const content = `
         <div class="page-header">
             <div>
-                <a href="#/folders" class="link">? Back to Folders</a>
+                <a href="#/folders" class="link">Back to Folders</a>
             </div>
         </div>
         

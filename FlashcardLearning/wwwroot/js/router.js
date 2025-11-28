@@ -794,17 +794,17 @@ function renderFlashcardView() {
                         <div>
                             <h2>${card.term}</h2>
                             <p class="text-muted mt-2">Click to flip</p>
+                            ${card.audioUrl ? `
+                                <button class="btn btn-success btn-sm mt-2" onclick="event.stopPropagation(); playAudio('${card.audioUrl}')">
+                                    Play Audio
+                                </button>
+                            ` : ''}
                         </div>
                     </div>
                     <div class="flip-card-back">
                         <div>
                             <h3>${card.definition}</h3>
                             ${card.example ? `<p class="mt-2" style="font-size:1rem; font-style:italic;">${card.example}</p>` : ''}
-                            ${card.audioUrl ? `
-                                <button class="btn btn-success btn-sm mt-2" onclick="event.stopPropagation(); playAudio('${card.audioUrl}')">
-                                    Play Audio
-                                </button>
-                            ` : ''}
                         </div>
                     </div>
                 </div>

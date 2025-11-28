@@ -1,4 +1,4 @@
-// ============================
+Ôªø// ============================
 // ADVANCED UTILITIES
 // ============================
 
@@ -18,7 +18,7 @@ function debounce(func, wait) {
 // Copy to clipboard
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(() => {
-        showAlert('?„ copy v‡o clipboard!', 'success');
+        showAlert('?√£ copy v√†o clipboard!', 'success');
     }).catch(err => {
         console.error('Copy failed:', err);
     });
@@ -112,7 +112,7 @@ function speak(text, lang = 'en-US') {
         utterance.lang = lang;
         window.speechSynthesis.speak(utterance);
     } else {
-        showAlert('TrÏnh duy?t khÙng h? tr? Text-to-Speech', 'error');
+        showAlert('Tr√¨nh duy?t kh√¥ng h? tr? Text-to-Speech', 'error');
     }
 }
 
@@ -285,7 +285,7 @@ function setupTokenRefresh() {
         
         if (refreshTime > 0) {
             setTimeout(() => {
-                showAlert('PhiÍn ??ng nh?p s?p h?t h?n. Vui lÚng ??ng nh?p l?i.', 'info');
+                showAlert('Phi√™n ƒêƒÉng nh·∫≠p h·∫øt h·∫°n vui l√≤ng th·ª≠ l·∫°i.', 'info');
             }, refreshTime);
         }
     }
@@ -547,13 +547,13 @@ class AutoSave {
         if (this.saveCallback) {
             await this.saveCallback();
             this.isDirty = false;
-            showAlert('?„ t? ??ng l?u', 'success');
+            showAlert('?√£ t? ??ng l?u', 'success');
         }
     }
 }
 
 // Error handler wrapper
-async function handleAsync(asyncFn, errorMessage = '?„ cÛ l?i x?y ra') {
+async function handleAsync(asyncFn, errorMessage = '?√£ c√≥ l?i x?y ra') {
     try {
         return await asyncFn();
     } catch (error) {

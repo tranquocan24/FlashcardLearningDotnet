@@ -10,28 +10,28 @@ async function renderFolders() {
     
     const content = `
         <div class="page-header">
-            <h1>?? My Folders</h1>
+            <h1>My Folders</h1>
             <button class="btn btn-primary" onclick="showCreateFolderModal()">+ Create New Folder</button>
         </div>
         
         <div class="card mb-3">
             <div class="alert alert-info" style="margin: 0;">
-                <strong>?? What are folders?</strong> Organize your decks into folders for better management. 
+                <strong>What are folders?</strong> Organize your decks into folders for better management. 
                 Deleting a folder will NOT delete the decks inside - they'll just become unassigned.
             </div>
         </div>
         
         ${!folders || folders.length === 0 ? 
-            renderEmptyState('??', 'No folders yet', 'Create your first folder to organize your decks!') :
+            renderEmptyState('No folders yet', 'Create your first folder to organize your decks!') :
             `<div class="folder-grid">
                 ${folders.map(folder => `
                     <div class="folder-item" onclick="navigate('/folder/${folder.id}')">
-                        <div class="folder-icon">??</div>
+                        <div class="folder-icon"></div>
                         <h3>${folder.name}</h3>
                         <p>${folder.description || 'No description'}</p>
                         <div class="folder-meta">
-                            <span>?? ${folder.deckCount || 0} decks</span>
-                            <span>?? ${formatDate(folder.createdAt).split(',')[0]}</span>
+                            <span>${folder.deckCount || 0} decks</span>
+                            <span>${formatDate(folder.createdAt).split(',')[0]}</span>
                         </div>
                         <div class="folder-actions" onclick="event.stopPropagation()">
                             <button class="btn-view" onclick="navigate('/folder/${folder.id}')">View</button>
@@ -44,7 +44,7 @@ async function renderFolders() {
         
         <div class="card mt-3">
             <div class="card-header">
-                <h3>?? Unassigned Decks</h3>
+                <h3>Unassigned Decks</h3>
                 <button class="btn btn-sm btn-primary" onclick="navigate('/decks')">View All Decks</button>
             </div>
             <div id="unassignedDecks">Loading...</div>
@@ -67,7 +67,7 @@ async function loadUnassignedDecks() {
     if (!container) return;
     
     if (!decks || decks.length === 0) {
-        container.innerHTML = '<p class="text-muted text-center" style="padding: 20px;">All decks are organized in folders! ??</p>';
+        container.innerHTML = '<p class="text-muted text-center" style="padding: 20px;">All decks are organized in folders! ?</p>';
         return;
     }
     
@@ -80,14 +80,14 @@ async function loadUnassignedDecks() {
                     <div class="deck-meta">
                         <div>
                             <span class="badge ${deck.isPublic ? 'badge-public' : 'badge-private'}">
-                                ${deck.isPublic ? '?? Public' : '?? Private'}
+                                ${deck.isPublic ? 'Public' : 'Private'}
                             </span>
                             <span class="text-muted" style="margin-left:10px;">
-                                ?? ${deck.flashcardCount || 0} cards
+                                ${deck.flashcardCount || 0} cards
                             </span>
                         </div>
                         <div class="deck-actions" onclick="event.stopPropagation()">
-                            <button class="btn btn-sm btn-primary" onclick="showMoveDeckModal('${deck.id}', null)">?? Move</button>
+                            <button class="btn btn-sm btn-primary" onclick="showMoveDeckModal('${deck.id}', null)">Move</button>
                         </div>
                     </div>
                 </div>
@@ -122,10 +122,10 @@ async function renderFolderDetail(params) {
         </div>
         
         <div class="folder-detail-header">
-            <h1>?? ${folder.name}</h1>
+            <h1>${folder.name}</h1>
             <p>${folder.description || 'No description'}</p>
             <div class="folder-badge">
-                ?? ${decks.length} deck${decks.length !== 1 ? 's' : ''}
+                ${decks.length} deck${decks.length !== 1 ? 's' : ''}
             </div>
         </div>
         
@@ -136,7 +136,7 @@ async function renderFolderDetail(params) {
             </div>
             
             ${decks.length === 0 ? 
-                renderEmptyState('??', 'No decks in this folder', 'Move decks here to organize them!') :
+                renderEmptyState('No decks in this folder', 'Move decks here to organize them!') :
                 `<div class="deck-grid">
                     ${decks.map(deck => `
                         <div class="deck-item" onclick="navigate('/deck/${deck.id}')">
@@ -145,15 +145,15 @@ async function renderFolderDetail(params) {
                             <div class="deck-meta">
                                 <div>
                                     <span class="badge ${deck.isPublic ? 'badge-public' : 'badge-private'}">
-                                        ${deck.isPublic ? '?? Public' : '?? Private'}
+                                        ${deck.isPublic ? 'Public' : 'Private'}
                                     </span>
                                     <span class="text-muted" style="margin-left:10px;">
-                                        ?? ${deck.flashcardCount || 0} cards
+                                        ${deck.flashcardCount || 0} cards
                                     </span>
                                 </div>
                                 <div class="deck-actions" onclick="event.stopPropagation()">
-                                    <button class="btn btn-sm btn-primary" onclick="navigate('/study/${deck.id}')">?? Study</button>
-                                    <button class="btn btn-sm btn-secondary" onclick="showMoveDeckModal('${deck.id}', '${folderId}')">?? Move</button>
+                                    <button class="btn btn-sm btn-primary" onclick="navigate('/study/${deck.id}')">Study</button>
+                                    <button class="btn btn-sm btn-secondary" onclick="showMoveDeckModal('${deck.id}', '${folderId}')">Move</button>
                                 </div>
                             </div>
                         </div>
@@ -181,7 +181,7 @@ function showCreateFolderModal() {
         </div>
     `;
     
-    openModal('?? Create New Folder', modalContent, [
+    openModal('Create New Folder', modalContent, [
         { text: 'Cancel', class: 'btn-secondary', onclick: 'closeModal()' },
         { text: '? Create', class: 'btn-primary', onclick: 'createFolder()' }
     ]);
@@ -220,7 +220,7 @@ async function createFolder() {
 // DELETE FOLDER
 // ============================
 async function deleteFolder(folderId) {
-    if (!confirm('??? Are you sure you want to delete this folder?\n\n?? Don\'t worry: Decks inside will NOT be deleted, they\'ll just become unassigned.')) {
+    if (!confirm('Are you sure you want to delete this folder?\n\nDon\'t worry: Decks inside will NOT be deleted, they\'ll just become unassigned.')) {
         return;
     }
     
@@ -242,13 +242,13 @@ async function showMoveDeckModal(deckId, currentFolderId) {
     const folders = await apiCall('/Folders');
     
     if (!folders || folders.length === 0) {
-        showAlert('?? Please create a folder first!', 'error');
+        showAlert('Please create a folder first!', 'error');
         return;
     }
     
     const modalContent = `
         <div class="folder-select-container">
-            <label>?? Move deck to folder:</label>
+            <label>Move deck to folder:</label>
             <select id="targetFolderId" class="form-control">
                 <option value="">-- Remove from folder (Unassign) --</option>
                 ${folders.map(f => `
@@ -261,14 +261,14 @@ async function showMoveDeckModal(deckId, currentFolderId) {
         
         <div class="alert alert-info" style="margin-top: 15px;">
             <small>
-                <strong>?? Tip:</strong> Select a folder to organize your deck, or choose "Remove from folder" to unassign it.
+                <strong>Tip:</strong> Select a folder to organize your deck, or choose "Remove from folder" to unassign it.
             </small>
         </div>
     `;
     
-    openModal('?? Move Deck', modalContent, [
+    openModal('Move Deck', modalContent, [
         { text: 'Cancel', class: 'btn-secondary', onclick: 'closeModal()' },
-        { text: '? Move', class: 'btn-primary', onclick: `moveDeck('${deckId}')` }
+        { text: 'Move', class: 'btn-primary', onclick: `moveDeck('${deckId}')` }
     ]);
 }
 

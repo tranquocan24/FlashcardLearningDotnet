@@ -1,6 +1,7 @@
 ﻿using FlashcardLearning.Models;
 using FlashcardLearning.Repositories;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace FlashcardLearning.Services
 {
@@ -78,7 +79,9 @@ namespace FlashcardLearning.Services
             {
                 var url = $"https://api.mymemory.translated.net/get?q={Uri.EscapeDataString(word)}&langpair=en|vi";
 
-                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+                _logger.LogInformation($"Calling MyMemory API for word: {word}");
+
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
                 var response = await _httpClient.GetAsync(url, cts.Token);
 
                 if (!response.IsSuccessStatusCode)
@@ -88,10 +91,18 @@ namespace FlashcardLearning.Services
                 }
 
                 var json = await response.Content.ReadAsStringAsync();
-                var result = JsonSerializer.Deserialize<MyMemoryResponse>(json);
+                _logger.LogInformation($"API Response: {json}");
+
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                };
+
+                var result = JsonSerializer.Deserialize<MyMemoryResponse>(json, options);
 
                 if (result?.ResponseData?.TranslatedText != null)
                 {
+                    _logger.LogInformation($"Translation found: {result.ResponseData.TranslatedText}");
                     return result.ResponseData.TranslatedText;
                 }
 
@@ -170,11 +181,19 @@ namespace FlashcardLearning.Services
         /// </summary>
         private class MyMemoryResponse
         {
+            [JsonPropertyName("responseData")]
             public ResponseDataModel? ResponseData { get; set; }
+
+            [JsonPropertyName("responseStatus")]
+            public int ResponseStatus { get; set; }
 
             public class ResponseDataModel
             {
+                [JsonPropertyName("translatedText")]
                 public string? TranslatedText { get; set; }
+
+                [JsonPropertyName("match")]
+                public double Match { get; set; }
             }
         }
     }

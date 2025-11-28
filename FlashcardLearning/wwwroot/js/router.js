@@ -269,7 +269,7 @@ async function renderDecks() {
         <div class="page-header">
             <h1>My Decks</h1>
             <div class="btn-group">
-                <button class="btn btn-secondary" onclick="navigate('/folders')">?? Manage Folders</button>
+                <button class="btn btn-secondary" onclick="navigate('/folders')">Manage Folders</button>
                 <button class="btn btn-primary" onclick="showCreateDeckModal()">+ Create New Deck</button>
             </div>
         </div>
@@ -281,21 +281,21 @@ async function renderDecks() {
                     <div class="deck-item" onclick="navigate('/deck/${deck.id}')">
                         <h3>${deck.title}</h3>
                         <p>${deck.description || 'No description'}</p>
-                        ${deck.folderId ? '<div class="current-folder-badge">?? In Folder</div>' : ''}
+                        ${deck.folderId ? '<div class="current-folder-badge">In Folder</div>' : ''}
                         <div class="deck-meta">
                             <div>
                                 <span class="badge ${deck.isPublic ? 'badge-public' : 'badge-private'}">
-                                    ${deck.isPublic ? '?? Public' : '?? Private'}
+                                    ${deck.isPublic ? 'Public' : 'Private'}
                                 </span>
                                 <span class="text-muted" style="margin-left:10px;">
                                     ${deck.flashcardCount || 0} cards
                                 </span>
                             </div>
                             <div class="deck-actions" onclick="event.stopPropagation()">
-                                <button class="btn btn-sm btn-success" onclick="navigate('/study/${deck.id}')">??</button>
-                                <button class="btn btn-sm btn-warning" onclick="showMoveDeckModal('${deck.id}', '${deck.folderId || ''}')">??</button>
-                                <button class="btn btn-sm btn-secondary" onclick="showEditDeckModal('${deck.id}')">??</button>
-                                <button class="btn btn-sm btn-danger" onclick="deleteDeck('${deck.id}')">???</button>
+                                <button class="btn btn-sm btn-success" onclick="navigate('/study/${deck.id}')">Study</button>
+                                <button class="btn btn-sm btn-warning" onclick="showMoveDeckModal('${deck.id}', '${deck.folderId || ''}')">Folder</button>
+                                <button class="btn btn-sm btn-secondary" onclick="showEditDeckModal('${deck.id}')">Edit</button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteDeck('${deck.id}')">Delete</button>
                             </div>
                         </div>
                     </div>
@@ -318,7 +318,7 @@ function showCreateDeckModal() {
             <textarea id="deckDescription" placeholder="Brief description of the deck..."></textarea>
         </div>
         <div class="form-group">
-            <label>?? Folder (Optional)</label>
+            <label>Folder (Optional)</label>
             <select id="deckFolderId">
                 <option value="">-- No Folder --</option>
             </select>
@@ -354,7 +354,7 @@ async function showEditDeckModal(deckId) {
             <textarea id="editDeckDescription">${deck.description || ''}</textarea>
         </div>
         <div class="form-group">
-            <label>?? Folder (Optional)</label>
+            <label>Folder (Optional)</label>
             <select id="editDeckFolderId">
                 <option value="">-- No Folder --</option>
             </select>
@@ -458,18 +458,18 @@ async function lookupWord(word) {
     if (!word || word.trim().length === 0) return;
     
     try {
-        // Hi?n th? loading indicator
+        // Show loading indicator
         const definitionInput = document.getElementById('cardDefinition');
         if (!definitionInput) return;
         
-        // Ch? g?i ý n?u ô Definition ?ang R?NG
+        // Only suggest if Definition field is EMPTY
         if (definitionInput.value && definitionInput.value.trim() !== '') {
             return;
         }
         
-        // Thêm placeholder ?? báo ?ang loading
+        // Add placeholder to show loading
         const originalPlaceholder = definitionInput.placeholder;
-        definitionInput.placeholder = '? ?ang tra c?u...';
+        definitionInput.placeholder = 'Looking up...';
         
         const data = await apiCall(`/Dictionary/lookup?word=${encodeURIComponent(word.trim())}`);
         
@@ -477,7 +477,7 @@ async function lookupWord(word) {
         definitionInput.placeholder = originalPlaceholder;
         
         if (data && data.success && data.meaning) {
-            // Ch? ?i?n n?u ô v?n ?ang R?NG (user ch?a nh?p gì)
+            // Only fill if field is still EMPTY (user hasn't typed anything)
             if (!definitionInput.value || definitionInput.value.trim() === '') {
                 definitionInput.value = data.meaning;
                 definitionInput.style.borderColor = '#28a745'; // Green border
@@ -569,12 +569,12 @@ async function refreshDeckDetail() {
 function showCreateFlashcardModal(deckId) {
     const modalContent = `
         <div class="form-group">
-            <label>Term (Ti?ng Anh) *</label>
+            <label>Term (English) *</label>
             <input type="text" id="cardTerm" placeholder="e.g. Hello">
-            <small class="text-muted">?? Nh?p t? ti?ng Anh và ??i 1 giây, h? th?ng s? t? ??ng g?i ý ngh?a</small>
+            <small class="text-muted">Enter an English word and wait 1 second for auto-suggestion</small>
         </div>
         <div class="form-group">
-            <label>Definition (Ngh?a Ti?ng Vi?t) *</label>
+            <label>Definition (Vietnamese) *</label>
             <input type="text" id="cardDefinition" placeholder="e.g. Xin chào">
         </div>
         <div class="form-group">
@@ -586,7 +586,7 @@ function showCreateFlashcardModal(deckId) {
             <input type="text" id="cardImageUrl" placeholder="https://example.com/image.jpg">
         </div>
         <div class="alert alert-info">
-            <small>? Audio s? t? ??ng t?o t? Term (n?u có trong t? ?i?n)</small>
+            <small>Audio will be auto-generated from Term (if available in dictionary)</small>
         </div>
     `;
     
@@ -608,7 +608,7 @@ function showCreateFlashcardModal(deckId) {
                 }
             });
         }
-    }, 100); // ??i modal render xong
+    }, 100); // Wait for modal to render
 }
 
 async function showEditFlashcardModal(cardId, deckId) {
@@ -1524,17 +1524,17 @@ function renderLayout(content) {
                     </div>
                 </div>
                 <ul class="sidebar-menu">
-                    <li><a href="#/dashboard" class="${currentHash.includes('dashboard') ? 'active' : ''}">?? Dashboard</a></li>
-                    <li><a href="#/decks" class="${currentHash.includes('decks') || currentHash.includes('deck/') ? 'active' : ''}">?? My Decks</a></li>
-                    <li><a href="#/folders" class="${currentHash.includes('folder') ? 'active' : ''}">?? Folders</a></li>
-                    <li><a href="#/history" class="${currentHash.includes('history') ? 'active' : ''}">?? Study History</a></li>
-                    <li><a href="#/profile" class="${currentHash.includes('profile') ? 'active' : ''}">?? Profile</a></li>
-                    ${isAdmin ? `<li><a href="#/admin" class="${currentHash.includes('admin') ? 'active' : ''}">?? Admin Panel</a></li>` : ''}
-                    <li style="margin-top: 20px;"><a href="#/logout" style="color:#ff6b6b;">?? Logout</a></li>
+                    <li><a href="#/dashboard" class="${currentHash.includes('dashboard') ? 'active' : ''}">Dashboard</a></li>
+                    <li><a href="#/decks" class="${currentHash.includes('decks') || currentHash.includes('deck/') ? 'active' : ''}">My Decks</a></li>
+                    <li><a href="#/folders" class="${currentHash.includes('folder') ? 'active' : ''}">Folders</a></li>
+                    <li><a href="#/history" class="${currentHash.includes('history') ? 'active' : ''}">Study History</a></li>
+                    <li><a href="#/profile" class="${currentHash.includes('profile') ? 'active' : ''}">Profile</a></li>
+                    ${isAdmin ? `<li><a href="#/admin" class="${currentHash.includes('admin') ? 'active' : ''}">Admin Panel</a></li>` : ''}
+                    <li style="margin-top: 20px;"><a href="#/logout" style="color:#ff6b6b;">Logout</a></li>
                 </ul>
                 <div style="position: absolute; bottom: 20px; left: 20px; right: 20px; font-size: 0.75rem; opacity: 0.5; text-align: center;">
-                    <a href="/guide.html" target="_blank" style="color: white;">?? Guide</a> | 
-                    <a href="/test-api.html" target="_blank" style="color: white;">?? API Test</a>
+                    <a href="/guide.html" target="_blank" style="color: white;">Guide</a> | 
+                    <a href="/test-api.html" target="_blank" style="color: white;">API Test</a>
                 </div>
             </aside>
             <main class="main-content">

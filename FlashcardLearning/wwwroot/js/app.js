@@ -143,10 +143,22 @@ function openModal(title, content, footerButtons = []) {
     
     document.body.appendChild(modal);
     
-    // Close on outside click
+    // Close on outside click - CH? khi click ?ÚNG vào overlay, KHÔNG ph?i children
     modal.addEventListener('click', (e) => {
-        if (e.target === modal) closeModal();
+        // Ch? ?óng n?u click tr?c ti?p vào overlay (không ph?i modal content)
+        if (e.target.classList.contains('modal-overlay')) {
+            closeModal();
+        }
     });
+    
+    // Close on ESC key
+    const escHandler = (e) => {
+        if (e.key === 'Escape') {
+            closeModal();
+            document.removeEventListener('keydown', escHandler);
+        }
+    };
+    document.addEventListener('keydown', escHandler);
 }
 
 function closeModal() {
@@ -180,20 +192,20 @@ function renderLayout(content) {
         <div class="app-container">
             <aside class="sidebar">
                 <div class="sidebar-header">
-                    <h2>?? Flashcard</h2>
+                    <h2>Flashcard Learning</h2>
                     <div class="user-info">
-                        <div>?? ${userInfo?.username || 'User'}</div>
+                        <div>${userInfo?.username || 'User'}</div>
                         <div style="font-size:0.75rem; opacity:0.7">${userInfo?.role || 'User'}</div>
                     </div>
                 </div>
                 <ul class="sidebar-menu">
-                    <li><a href="#/dashboard" class="${currentHash.includes('dashboard') ? 'active' : ''}">?? Dashboard</a></li>
-                    <li><a href="#/decks" class="${currentHash.includes('decks') || currentHash.includes('deck/') ? 'active' : ''}">?? My Decks</a></li>
-                    <li><a href="#/folders" class="${currentHash.includes('folder') ? 'active' : ''}">?? Folders</a></li>
-                    <li><a href="#/history" class="${currentHash.includes('history') ? 'active' : ''}">?? Study History</a></li>
-                    <li><a href="#/profile" class="${currentHash.includes('profile') ? 'active' : ''}">?? Profile</a></li>
-                    ${isAdmin ? `<li><a href="#/admin" class="${currentHash.includes('admin') ? 'active' : ''}">?? Admin Panel</a></li>` : ''}
-                    <li style="margin-top: 20px;"><a href="#/logout" style="color:#ff6b6b;">?? Logout</a></li>
+                    <li><a href="#/dashboard" class="${currentHash.includes('dashboard') ? 'active' : ''}">Dashboard</a></li>
+                    <li><a href="#/decks" class="${currentHash.includes('decks') || currentHash.includes('deck/') ? 'active' : ''}">My Decks</a></li>
+                    <li><a href="#/folders" class="${currentHash.includes('folder') ? 'active' : ''}">Folders</a></li>
+                    <li><a href="#/history" class="${currentHash.includes('history') ? 'active' : ''}">Study History</a></li>
+                    <li><a href="#/profile" class="${currentHash.includes('profile') ? 'active' : ''}">Profile</a></li>
+                    ${isAdmin ? `<li><a href="#/admin" class="${currentHash.includes('admin') ? 'active' : ''}">Admin Panel</a></li>` : ''}
+                    <li style="margin-top: 20px;"><a href="#/logout" style="color:#ff6b6b;">Logout</a></li>
                 </ul>
             </aside>
             <main class="main-content">

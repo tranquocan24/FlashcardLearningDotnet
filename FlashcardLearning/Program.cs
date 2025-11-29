@@ -11,15 +11,12 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ============================
 // DATABASE CONTEXT
-// ============================
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DBConnection")));
 
-// ============================
 // REPOSITORIES (Data Access Layer)
-// ============================
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IDeckRepository, DeckRepository>();
 builder.Services.AddScoped<IFolderRepository, FolderRepository>();
@@ -28,9 +25,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IStudySessionRepository, StudySessionRepository>();
 builder.Services.AddScoped<IDictionaryRepository, DictionaryRepository>();
 
-// ============================
 // SERVICES (Business Logic Layer)
-// ============================
 builder.Services.AddScoped<IDeckService, DeckService>();
 builder.Services.AddScoped<IFolderService, FolderService>();
 builder.Services.AddScoped<IFlashcardService, FlashcardService>();
@@ -39,9 +34,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IStudySessionService, StudySessionService>();
 builder.Services.AddScoped<IDictionaryService, DictionaryService>();
 
-// ============================
 // CONTROLLERS & JSON OPTIONS
-// ============================
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -49,9 +42,7 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     });
 
-// ============================
 // AUTHENTICATION (JWT)
-// ============================
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -65,9 +56,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// ============================
 // SWAGGER DOCUMENTATION
-// ============================
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -86,9 +75,7 @@ builder.Services.AddSwaggerGen(options =>
     options.OperationFilter<SecurityRequirementsOperationFilter>();
 });
 
-// ============================
 // HTTP CLIENT (for external APIs)
-// ============================
 builder.Services.AddHttpClient<IDictionaryService, DictionaryService>(client =>
 {
     client.Timeout = TimeSpan.FromSeconds(5);
@@ -96,9 +83,6 @@ builder.Services.AddHttpClient<IDictionaryService, DictionaryService>(client =>
 
 var app = builder.Build();
 
-// ============================
-// MIDDLEWARE PIPELINE
-// ============================
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

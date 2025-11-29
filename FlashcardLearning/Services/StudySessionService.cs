@@ -22,7 +22,7 @@ public class StudySessionService : IStudySessionService
         var deck = await _deckRepository.GetByIdAsync(session.DeckId);
         if (deck == null)
         {
-            throw new InvalidOperationException("B? th? không t?n t?i.");
+            throw new InvalidOperationException("Deck is not exist.");
         }
 
         // Set user and session data
@@ -33,7 +33,7 @@ public class StudySessionService : IStudySessionService
         // Validate score
         if (session.TotalCards > 0 && session.Score > session.TotalCards)
         {
-            throw new InvalidOperationException("?i?m s? không th? l?n h?n t?ng s? câu.");
+            throw new InvalidOperationException("Score can not be higher than total cards.");
         }
 
         // Set default mode if not provided
@@ -58,7 +58,7 @@ public class StudySessionService : IStudySessionService
             s.Score,
             s.TotalCards,
             s.Mode,
-            DeckTitle = s.Deck != null ? s.Deck.Title : "B? th? ?ã b? xóa",
+            DeckTitle = s.Deck != null ? s.Deck.Title : "Deck was deleted",
             DeckId = s.DeckId
         });
     }
@@ -69,7 +69,7 @@ public class StudySessionService : IStudySessionService
         var deck = await _deckRepository.GetByIdAsync(deckId);
         if (deck == null)
         {
-            throw new InvalidOperationException("B? th? không t?n t?i.");
+            throw new InvalidOperationException("Deck is not exist.");
         }
 
         var leaderboard = await _studySessionRepository.GetLeaderboardAsync(deckId, 10);

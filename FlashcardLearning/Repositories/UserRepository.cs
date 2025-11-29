@@ -3,9 +3,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FlashcardLearning.Repositories;
 
-/// <summary>
-/// User repository implementation
-/// </summary>
 public class UserRepository : Repository<User>, IUserRepository
 {
     public UserRepository(AppDbContext context) : base(context)

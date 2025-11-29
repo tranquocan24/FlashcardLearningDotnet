@@ -27,7 +27,7 @@ public class AuthService : IAuthService
         var existingUser = await _userRepository.GetUserByEmailAsync(request.Email);
         if (existingUser != null)
         {
-            throw new InvalidOperationException("Email ?ã t?n t?i.");
+            throw new InvalidOperationException("Email existed");
         }
 
         // Hash password
@@ -59,13 +59,13 @@ public class AuthService : IAuthService
         var user = await _userRepository.GetUserByEmailAsync(request.Email);
         if (user == null)
         {
-            throw new UnauthorizedAccessException("Email ho?c m?t kh?u không ?úng.");
+            throw new UnauthorizedAccessException("Email or password is incorrect.");
         }
 
         // Verify password
         if (!BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
         {
-            throw new UnauthorizedAccessException("Email ho?c m?t kh?u không ?úng.");
+            throw new UnauthorizedAccessException("Email or password is incorrect.");
         }
 
         // Generate JWT token

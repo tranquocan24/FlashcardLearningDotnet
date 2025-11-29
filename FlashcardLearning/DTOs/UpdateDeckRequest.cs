@@ -4,11 +4,11 @@ namespace FlashcardLearning.DTOs;
 
 public class UpdateDeckRequest
 {
-    [Required(ErrorMessage = "Tiêu ?? không ???c ?? tr?ng")]
-    [MaxLength(200, ErrorMessage = "Tiêu ?? không ???c v??t quá 200 ký t?")]
+    [Required(ErrorMessage = "Title can not be null")]
+    [MaxLength(200, ErrorMessage = "Title must not be more than 200 characters")]
     public string Title { get; set; } = string.Empty;
 
-    [MaxLength(1000, ErrorMessage = "Mô t? không ???c v??t quá 1000 ký t?")]
+    [MaxLength(1000, ErrorMessage = "Description can not be more than 1000 characters")]
     public string? Description { get; set; }
 
     public bool IsPublic { get; set; } = false;

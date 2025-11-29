@@ -11,14 +11,14 @@ public class DeckResponse
     public DateTime CreatedAt { get; set; }
     public Guid? UserId { get; set; }
     public Guid? FolderId { get; set; }
-    public int FlashcardCount { get; set; }
+    public int  FlashcardCount { get; set; }
 }
 
 public class DeckDetailResponse : DeckResponse
 {
     public List<FlashcardResponse> Flashcards { get; set; } = new();
 }
-
+        
 public class FlashcardResponse
 {
     public Guid Id { get; set; }

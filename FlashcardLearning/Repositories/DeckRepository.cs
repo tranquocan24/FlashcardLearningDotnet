@@ -3,9 +3,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FlashcardLearning.Repositories;
 
-/// <summary>
-/// Deck repository implementation with domain-specific queries
-/// </summary>
 public class DeckRepository : Repository<Deck>, IDeckRepository
 {
     public DeckRepository(AppDbContext context) : base(context)

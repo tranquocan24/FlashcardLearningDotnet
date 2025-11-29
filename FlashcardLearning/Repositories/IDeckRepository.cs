@@ -2,9 +2,6 @@ using FlashcardLearning.Models;
 
 namespace FlashcardLearning.Repositories;
 
-/// <summary>
-/// Deck repository interface with domain-specific operations
-/// </summary>
 public interface IDeckRepository : IRepository<Deck>
 {
     // Specialized query methods

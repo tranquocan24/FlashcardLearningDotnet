@@ -18,18 +18,18 @@ namespace FlashcardLearning.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-        public Guid? UserId { get; set; }
+        public Guid UserId { get; set; }
 
         public Guid? FolderId { get; set; }
 
         [JsonIgnore]
         [ForeignKey("UserId")]
-        public User? Owner { get; set; }
+        public User Owner { get; set; } = null!;
 
         [JsonIgnore]
         [ForeignKey("FolderId")]
         public Folder? Folder { get; set; }
 
-        public ICollection<Flashcard>? Flashcards { get; set; }
+        public ICollection<Flashcard>? Flashcards { get; set; } = new List<Flashcard>();
     }
 }

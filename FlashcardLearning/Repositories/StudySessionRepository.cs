@@ -3,9 +3,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FlashcardLearning.Repositories;
 
-/// <summary>
-/// StudySession repository implementation
-/// </summary>
 public class StudySessionRepository : Repository<StudySession>, IStudySessionRepository
 {
     public StudySessionRepository(AppDbContext context) : base(context)
@@ -32,13 +29,15 @@ public class StudySessionRepository : Repository<StudySession>, IStudySessionRep
 
     public async Task<IEnumerable<StudySession>> GetLeaderboardAsync(Guid deckId, int topCount = 10)
     {
-        return await _dbSet
-            .Include(s => s.User)
-            .Where(s => s.DeckId == deckId)
-            .OrderByDescending(s => s.Score)
-            .ThenBy(s => s.TotalCards)
-            .Take(topCount)
-            .ToListAsync();
+        var topSessions = await _dbSet
+        .Where(s => s.DeckId == deckId)
+        .GroupBy(s => s.UserId)
+        .Select(g => g.OrderByDescending(s => s.Score).First())
+        .OrderByDescending(s => s.Score)
+        .Take(topCount)
+        .ToListAsync();
+
+        return topSessions;
     }
 
     public async Task<IEnumerable<StudySession>> GetAllSessionsAsync()

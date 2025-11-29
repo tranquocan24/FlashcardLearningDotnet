@@ -42,7 +42,7 @@ namespace FlashcardLearning.Services
             // Check ownership
             if (folder.UserId != userId)
             {
-                throw new UnauthorizedAccessException("B?n không có quy?n truy c?p th? m?c này.");
+                throw new UnauthorizedAccessException("You do not have permission to access this folder.");
             }
 
             return new FolderWithDecksResponse
@@ -70,7 +70,7 @@ namespace FlashcardLearning.Services
             var existingFolder = await _folderRepository.GetFolderByNameAsync(request.Name, userId);
             if (existingFolder != null)
             {
-                throw new InvalidOperationException("Th? m?c v?i tên này ?ã t?n t?i.");
+                throw new InvalidOperationException("Folder is already exist.");
             }
 
             var folder = new Folder
@@ -79,7 +79,7 @@ namespace FlashcardLearning.Services
                 Name = request.Name,
                 Description = request.Description,
                 UserId = userId,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.Now
             };
 
             await _folderRepository.AddAsync(folder);
@@ -107,14 +107,14 @@ namespace FlashcardLearning.Services
             // Check ownership
             if (folder.UserId != userId)
             {
-                throw new UnauthorizedAccessException("B?n không có quy?n ch?nh s?a th? m?c này.");
+                throw new UnauthorizedAccessException("You do not have permission to update this folder.");
             }
 
             // Check for duplicate name with other folders
             var duplicateFolder = await _folderRepository.GetFolderByNameAsync(request.Name, userId);
             if (duplicateFolder != null && duplicateFolder.Id != folderId)
             {
-                throw new InvalidOperationException("Th? m?c v?i tên này ?ã t?n t?i.");
+                throw new InvalidOperationException("Folder is already exist.");
             }
 
             folder.Name = request.Name;
@@ -137,7 +137,7 @@ namespace FlashcardLearning.Services
             // Check ownership or admin
             if (folder.UserId != userId && !isAdmin)
             {
-                throw new UnauthorizedAccessException("B?n không có quy?n xóa th? m?c này.");
+                throw new UnauthorizedAccessException("You do not have permission to delete this folder.");
             }
 
             // Set FolderId = null for all decks in the folder

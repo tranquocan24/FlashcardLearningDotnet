@@ -2,9 +2,6 @@ using FlashcardLearning.DTOs;
 
 namespace FlashcardLearning.Services;
 
-/// <summary>
-/// Service interface for Deck business logic
-/// </summary>
 public interface IDeckService
 {
     // Query operations

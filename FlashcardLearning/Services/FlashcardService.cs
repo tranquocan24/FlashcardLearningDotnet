@@ -38,7 +38,7 @@ public class FlashcardService : IFlashcardService
             flashcard.Deck.UserId != userId &&
             !isAdmin)
         {
-            throw new UnauthorizedAccessException("B?n không có quy?n truy c?p flashcard này.");
+            throw new UnauthorizedAccessException("You do not have permission.");
         }
 
         return flashcard;
@@ -52,13 +52,13 @@ public class FlashcardService : IFlashcardService
         var deck = await _deckRepository.GetByIdAsync(flashcard.DeckId);
         if (deck == null)
         {
-            throw new InvalidOperationException("Deck không t?n t?i.");
+            throw new InvalidOperationException("Deck can not be loaded.");
         }
 
         // Check permissions
         if (deck.UserId != userId && !isAdmin)
         {
-            throw new UnauthorizedAccessException("B?n không có quy?n thêm flashcard vào deck này.");
+            throw new UnauthorizedAccessException("You do not have permission to update the flashcard.");
         }
 
         // Prepare data
@@ -105,7 +105,7 @@ public class FlashcardService : IFlashcardService
     {
         if (flashcardId != flashcardUpdate.Id)
         {
-            throw new ArgumentException("ID không kh?p.");
+            throw new ArgumentException("ID is mismatch.");
         }
 
         var existingCard = await _flashcardRepository.GetFlashcardWithDeckAsync(flashcardId);
@@ -120,7 +120,7 @@ public class FlashcardService : IFlashcardService
             existingCard.Deck.UserId != userId &&
             !isAdmin)
         {
-            throw new UnauthorizedAccessException("B?n không có quy?n ch?nh s?a flashcard này.");
+            throw new UnauthorizedAccessException("You do not have permission to change the flashcard.");
         }
 
         existingCard.Term = flashcardUpdate.Term;
@@ -147,7 +147,7 @@ public class FlashcardService : IFlashcardService
             flashcard.Deck.UserId != userId &&
             !isAdmin)
         {
-            throw new UnauthorizedAccessException("B?n không có quy?n xóa flashcard này.");
+            throw new UnauthorizedAccessException("You do not have permission to delete this flashcard.");
         }
 
         await _flashcardRepository.DeleteAsync(flashcard);

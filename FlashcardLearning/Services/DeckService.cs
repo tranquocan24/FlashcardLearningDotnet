@@ -4,10 +4,6 @@ using FlashcardLearning.Repositories;
 
 namespace FlashcardLearning.Services;
 
-/// <summary>
-/// Service implementation for Deck business logic
-/// Encapsulates all business rules and validations
-/// </summary>
 public class DeckService : IDeckService
 {
     private readonly IDeckRepository _deckRepository;

@@ -40,9 +40,6 @@ namespace FlashcardLearning.Controllers
             }
         }
 
-        /// <summary>
-        /// Xem lịch sử học tập của chính mình
-        /// </summary>
         [HttpGet("history")]
         public async Task<ActionResult<IEnumerable<object>>> GetMyHistory()
         {
@@ -53,10 +50,6 @@ namespace FlashcardLearning.Controllers
             var history = await _studySessionService.GetMyHistoryAsync(Guid.Parse(currentUserId));
             return Ok(history);
         }
-
-        /// <summary>
-        /// Xem bảng xếp hạng của một Bộ thẻ
-        /// </summary>
         [HttpGet("leaderboard/{deckId}")]
         public async Task<ActionResult<IEnumerable<object>>> GetDeckLeaderboard(Guid deckId)
         {
@@ -70,10 +63,7 @@ namespace FlashcardLearning.Controllers
                 return NotFound(ex.Message);
             }
         }
-
-        /// <summary>
         /// [ADMIN ONLY] Xem toàn bộ lịch sử hệ thống
-        /// </summary>
         [HttpGet("admin/all-history")]
         public async Task<ActionResult<IEnumerable<StudySession>>> GetAllHistory()
         {
@@ -88,9 +78,7 @@ namespace FlashcardLearning.Controllers
             return Ok(history);
         }
 
-        /// <summary>
         /// [ADMIN ONLY] Xóa lịch sử
-        /// </summary>
         [HttpDelete("admin/{id}")]
         public async Task<IActionResult> DeleteSession(Guid id)
         {

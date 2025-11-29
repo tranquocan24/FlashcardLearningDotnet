@@ -7,10 +7,6 @@ using System.Security.Claims;
 
 namespace FlashcardLearning.Controllers
 {
-    /// <summary>
-    /// Thin controller for Deck operations
-    /// All business logic delegated to IDeckService
-    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
@@ -39,11 +35,7 @@ namespace FlashcardLearning.Controllers
         #endregion
 
         #region Query Endpoints
-
-        /// <summary>
-        /// Get all decks accessible by current user
         /// Admin: All decks, User: Own decks + Public decks
-        /// </summary>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DeckResponse>>> GetDecks()
         {
@@ -62,9 +54,6 @@ namespace FlashcardLearning.Controllers
             }
         }
 
-        /// <summary>
-        /// Get deck by ID with flashcards
-        /// </summary>
         [HttpGet("{id}")]
         public async Task<ActionResult<DeckDetailResponse>> GetDeck(Guid id)
         {
@@ -90,9 +79,6 @@ namespace FlashcardLearning.Controllers
 
         #region Command Endpoints
 
-        /// <summary>
-        /// Create new deck
-        /// </summary>
         [HttpPost]
         public async Task<ActionResult<DeckResponse>> CreateDeck(CreateDeckRequest request)
         {
@@ -118,9 +104,6 @@ namespace FlashcardLearning.Controllers
             }
         }
 
-        /// <summary>
-        /// Update existing deck
-        /// </summary>
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateDeck(Guid id, UpdateDeckRequest request)
         {
@@ -149,10 +132,6 @@ namespace FlashcardLearning.Controllers
                 return StatusCode(500, new { message = "An error occurred", details = ex.Message });
             }
         }
-
-        /// <summary>
-        /// Delete deck
-        /// </summary>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDeck(Guid id)
         {

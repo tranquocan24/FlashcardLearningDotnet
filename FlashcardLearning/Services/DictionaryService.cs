@@ -23,9 +23,6 @@ namespace FlashcardLearning.Services
             _httpClient.Timeout = TimeSpan.FromSeconds(5);
         }
 
-        /// <summary>
-        /// Tra cứu nghĩa tiếng Việt của từ tiếng Anh
-        /// </summary>
         public async Task<string> LookupWordAsync(string word)
         {
             // Validate input
@@ -70,9 +67,6 @@ namespace FlashcardLearning.Services
             }
         }
 
-        /// <summary>
-        /// Gọi API MyMemory để lấy nghĩa tiếng Việt
-        /// </summary>
         private async Task<string> FetchFromExternalApiAsync(string word)
         {
             try
@@ -176,9 +170,6 @@ namespace FlashcardLearning.Services
             }
         }
 
-        /// <summary>
-        /// DTO cho MyMemory API Response
-        /// </summary>
         private class MyMemoryResponse
         {
             [JsonPropertyName("responseData")]

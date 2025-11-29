@@ -3,9 +3,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FlashcardLearning.Repositories;
 
-/// <summary>
-/// Folder repository implementation
-/// </summary>
 public class FolderRepository : Repository<Folder>, IFolderRepository
 {
     public FolderRepository(AppDbContext context) : base(context)

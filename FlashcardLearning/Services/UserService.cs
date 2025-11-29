@@ -63,7 +63,7 @@ public class UserService : IUserService
 
         if (!BCrypt.Net.BCrypt.Verify(oldPassword, user.Password))
         {
-            throw new InvalidOperationException("M?t kh?u c? không chính xác.");
+            throw new InvalidOperationException("Password incorrect.");
         }
 
         string newPasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
@@ -88,7 +88,7 @@ public class UserService : IUserService
     {
         if (userId == currentUserId)
         {
-            throw new InvalidOperationException("B?n không th? t? xóa tài kho?n c?a chính mình.");
+            throw new InvalidOperationException("You can not delete your own account.");
         }
 
         var user = await _userRepository.GetByIdAsync(userId);

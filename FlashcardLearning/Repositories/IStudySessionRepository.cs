@@ -2,9 +2,6 @@ using FlashcardLearning.Models;
 
 namespace FlashcardLearning.Repositories;
 
-/// <summary>
-/// StudySession repository interface
-/// </summary>
 public interface IStudySessionRepository : IRepository<StudySession>
 {
     Task<IEnumerable<StudySession>> GetSessionsByUserIdAsync(Guid userId);

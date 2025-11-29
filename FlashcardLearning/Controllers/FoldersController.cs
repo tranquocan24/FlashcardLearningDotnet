@@ -19,9 +19,6 @@ namespace FlashcardLearning.Controllers
             _folderService = folderService;
         }
 
-        /// <summary>
-        /// L?y danh sách t?t c? th? m?c c?a user hi?n t?i
-        /// </summary>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<FolderResponse>>> GetFolders()
         {
@@ -32,9 +29,6 @@ namespace FlashcardLearning.Controllers
             return Ok(folders);
         }
 
-        /// <summary>
-        /// L?y chi ti?t m?t th? m?c kèm danh sách Decks bên trong
-        /// </summary>
         [HttpGet("{id}")]
         public async Task<ActionResult<FolderWithDecksResponse>> GetFolder(Guid id)
         {
@@ -47,7 +41,7 @@ namespace FlashcardLearning.Controllers
                 
                 if (folder == null)
                 {
-                    return NotFound("Không tìm th?y th? m?c.");
+                    return NotFound("Can not find folder.");
                 }
 
                 return Ok(folder);
@@ -57,10 +51,6 @@ namespace FlashcardLearning.Controllers
                 return Forbid(ex.Message);
             }
         }
-
-        /// <summary>
-        /// T?o th? m?c m?i
-        /// </summary>
         [HttpPost]
         public async Task<ActionResult<FolderResponse>> CreateFolder(CreateFolderRequest request)
         {
@@ -78,9 +68,6 @@ namespace FlashcardLearning.Controllers
             }
         }
 
-        /// <summary>
-        /// C?p nh?t thông tin th? m?c
-        /// </summary>
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateFolder(Guid id, CreateFolderRequest request)
         {
@@ -93,7 +80,7 @@ namespace FlashcardLearning.Controllers
                 
                 if (!success)
                 {
-                    return NotFound("Không tìm th?y th? m?c.");
+                    return NotFound("Can not find folder.");
                 }
 
                 return NoContent();
@@ -108,9 +95,6 @@ namespace FlashcardLearning.Controllers
             }
         }
 
-        /// <summary>
-        /// Xóa th? m?c (các Deck bên trong s? có FolderId = NULL)
-        /// </summary>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteFolder(Guid id)
         {
@@ -126,7 +110,7 @@ namespace FlashcardLearning.Controllers
                 
                 if (!success)
                 {
-                    return NotFound("Không tìm th?y th? m?c.");
+                    return NotFound("Can not find folder.");
                 }
 
                 return NoContent();
@@ -137,9 +121,6 @@ namespace FlashcardLearning.Controllers
             }
         }
 
-        /// <summary>
-        /// L?y danh sách Decks không thu?c th? m?c nào
-        /// </summary>
         [HttpGet("unassigned-decks")]
         public async Task<ActionResult<IEnumerable<DeckSummary>>> GetUnassignedDecks()
         {

@@ -2,9 +2,6 @@ using FlashcardLearning.Models;
 
 namespace FlashcardLearning.Repositories;
 
-/// <summary>
-/// Folder repository interface
-/// </summary>
 public interface IFolderRepository : IRepository<Folder>
 {
     Task<Folder?> GetFolderWithDecksAsync(Guid folderId);

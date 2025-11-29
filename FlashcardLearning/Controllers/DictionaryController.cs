@@ -4,9 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FlashcardLearning.Controllers
 {
-    /// <summary>
-    /// API Controller cho ch?c n?ng tra t? ?i?n En -> Vi
-    /// </summary>
+
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
@@ -23,13 +21,6 @@ namespace FlashcardLearning.Controllers
             _logger = logger;
         }
 
-        /// <summary>
-        /// Tra c?u ngh?a ti?ng Vi?t c?a t? ti?ng Anh
-        /// </summary>
-        /// <param name="word">T? ti?ng Anh c?n tra</param>
-        /// <returns>Ngh?a ti?ng Vi?t</returns>
-        /// <response code="200">Tr? v? ngh?a ti?ng Vi?t</response>
-        /// <response code="400">T? không h?p l?</response>
         [HttpGet("lookup")]
         [ProducesResponseType(typeof(LookupResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -40,12 +31,12 @@ namespace FlashcardLearning.Controllers
                 // Validate input
                 if (string.IsNullOrWhiteSpace(word))
                 {
-                    return BadRequest(new { message = "T? c?n tra không ???c ?? tr?ng" });
+                    return BadRequest(new { message = "Word is null or have white space" });
                 }
 
                 if (word.Length > 200)
                 {
-                    return BadRequest(new { message = "T? quá dài (t?i ?a 200 ký t?)" });
+                    return BadRequest(new { message = "Word is too long (maximum 200 characters)" });
                 }
 
                 // Call service
@@ -61,13 +52,10 @@ namespace FlashcardLearning.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error in LookupWord for word: {word}");
-                return StatusCode(500, new { message = "L?i khi tra t?" });
+                return StatusCode(500, new { message = "Error while searching for the word." });
             }
         }
 
-        /// <summary>
-        /// DTO cho response
-        /// </summary>
         public class LookupResponse
         {
             public string Word { get; set; } = string.Empty;

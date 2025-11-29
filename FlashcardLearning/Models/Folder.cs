@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace FlashcardLearning.Models;
 
@@ -15,9 +17,11 @@ public class Folder
     [Required]
     public Guid UserId { get; set; }
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
 
     // Navigation Properties
+    [JsonIgnore]
+    [ForeignKey("UserId")]  
     public User? User { get; set; }
     public ICollection<Deck> Decks { get; set; } = new List<Deck>();
 }

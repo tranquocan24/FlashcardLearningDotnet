@@ -1,4 +1,4 @@
-using FlashcardLearning.Repositories;
+﻿using FlashcardLearning.Repositories;
 
 namespace FlashcardLearning.Services;
 
@@ -100,5 +100,46 @@ public class UserService : IUserService
 
         await _userRepository.DeleteAsync(user);
         return true;
+    }
+
+    public async Task<object?> AdminUpdateUserAsync(string email, string? newEmail, string? newPassword)
+    {
+        // Tìm user theo email hiện tại
+        var user = await _userRepository.GetUserByEmailAsync(email);
+        
+        if (user == null)
+        {
+            throw new InvalidOperationException("User with this email does not exist.");
+        }
+
+        if (!string.IsNullOrEmpty(newEmail) && newEmail != user.Email)
+        {
+            var existingUser = await _userRepository.GetUserByEmailAsync(newEmail);
+            if (existingUser != null)
+            {
+                throw new InvalidOperationException("New email is already in use by another user.");
+            }
+            
+            user.Email = newEmail;
+        }
+
+        if (!string.IsNullOrEmpty(newPassword))
+        {
+            user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+        }
+
+        await _userRepository.UpdateAsync(user);
+
+        return new
+        {
+            message = "User updated successfully!",
+            user = new
+            {
+                user.Id,
+                user.Username,
+                user.Email,
+                user.Role
+            }
+        };
     }
 }

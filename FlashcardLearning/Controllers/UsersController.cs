@@ -84,7 +84,8 @@ namespace FlashcardLearning.Controllers
             }
         }
 
-        // Admin
+        //ADMIN ENDPOINTS
+
         [HttpGet]
         public async Task<ActionResult<IEnumerable<object>>> GetAllUsers()
         {
@@ -97,6 +98,31 @@ namespace FlashcardLearning.Controllers
 
             var users = await _userService.GetAllUsersAsync();
             return Ok(users);
+        }
+
+        [HttpPut("admin/update-user")]
+        public async Task<ActionResult> AdminUpdateUser(AdminUpdateUserDto request)
+        {
+            var role = User.FindFirstValue(ClaimTypes.Role);
+            
+            if (role != UserRoles.Admin)
+            {
+                return Forbid();
+            }
+
+            try
+            {
+                var result = await _userService.AdminUpdateUserAsync(
+                    request.Email, 
+                    request.NewEmail, 
+                    request.NewPassword);
+
+                return Ok(result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpDelete("{id}")]

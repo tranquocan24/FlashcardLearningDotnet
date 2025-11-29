@@ -1,4 +1,4 @@
-using FlashcardLearning.Models;
+﻿using FlashcardLearning.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace FlashcardLearning.Repositories;
@@ -29,13 +29,40 @@ public class StudySessionRepository : Repository<StudySession>, IStudySessionRep
 
     public async Task<IEnumerable<StudySession>> GetLeaderboardAsync(Guid deckId, int topCount = 10)
     {
-        var topSessions = await _dbSet
-        .Where(s => s.DeckId == deckId)
-        .GroupBy(s => s.UserId)
-        .Select(g => g.OrderByDescending(s => s.Score).First())
-        .OrderByDescending(s => s.Score)
-        .Take(topCount)
-        .ToListAsync();
+        // Lấy top score của mỗi user trong deck này
+        var topUserIds = await _dbSet
+            .Where(s => s.DeckId == deckId)
+            .GroupBy(s => s.UserId)
+            .Select(g => new
+            {
+                UserId = g.Key,
+                MaxScore = g.Max(s => s.Score)
+            })
+            .OrderByDescending(x => x.MaxScore)
+            .Take(topCount)
+            .ToListAsync();
+
+        if (!topUserIds.Any())
+        {
+            return new List<StudySession>();
+        }
+
+        // Lấy session tương ứng với score cao nhất, bao gồm User
+        var topSessions = new List<StudySession>();
+
+        foreach (var item in topUserIds)
+        {
+            var session = await _dbSet
+                .Include(s => s.User)
+                .Where(s => s.DeckId == deckId && s.UserId == item.UserId && s.Score == item.MaxScore)
+                .OrderByDescending(s => s.DateStudied)
+                .FirstOrDefaultAsync();
+
+            if (session != null)
+            {
+                topSessions.Add(session);
+            }
+        }
 
         return topSessions;
     }

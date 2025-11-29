@@ -4,10 +4,6 @@ using System.Linq.Expressions;
 
 namespace FlashcardLearning.Repositories;
 
-/// <summary>
-/// Generic repository implementation for basic CRUD operations
-/// </summary>
-/// <typeparam name="T">Entity type</typeparam>
 public class Repository<T> : IRepository<T> where T : class
 {
     protected readonly AppDbContext _context;

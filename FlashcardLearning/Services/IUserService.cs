@@ -7,4 +7,5 @@ public interface IUserService
     Task<bool> ChangePasswordAsync(Guid userId, string oldPassword, string newPassword);
     Task<IEnumerable<object>> GetAllUsersAsync();
     Task<bool> DeleteUserAsync(Guid userId, Guid currentUserId);
+    Task<object?> AdminUpdateUserAsync(string email, string? newEmail, string? newPassword);
 }

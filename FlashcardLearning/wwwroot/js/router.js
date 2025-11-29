@@ -766,6 +766,7 @@ let studyCards = [];
 let studyDeckId = '';
 
 function startFlashcardMode(deckId, cards) {
+    // Reset all state variables
     studyCards = JSON.parse(JSON.stringify(cards));
     studyDeckId = deckId;
     currentCardIndex = 0;
@@ -794,17 +795,17 @@ function renderFlashcardView() {
                         <div>
                             <h2>${card.term}</h2>
                             <p class="text-muted mt-2">Click to flip</p>
+                            ${card.audioUrl ? `
+                                <button class="btn btn-success btn-sm mt-2" onclick="event.stopPropagation(); playAudio('${card.audioUrl}')">
+                                    Play Audio
+                                </button>
+                            ` : ''}
                         </div>
                     </div>
                     <div class="flip-card-back">
                         <div>
                             <h3>${card.definition}</h3>
                             ${card.example ? `<p class="mt-2" style="font-size:1rem; font-style:italic;">${card.example}</p>` : ''}
-                            ${card.audioUrl ? `
-                                <button class="btn btn-success btn-sm mt-2" onclick="event.stopPropagation(); playAudio('${card.audioUrl}')">
-                                    Play Audio
-                                </button>
-                            ` : ''}
                         </div>
                     </div>
                 </div>
@@ -842,6 +843,7 @@ let quizScore = 0;
 let selectedAnswer = null;
 
 function startQuizMode(deckId, cards) {
+    // Reset all state variables
     quizCards = JSON.parse(JSON.stringify(cards));
     quizDeckId = deckId;
     currentQuizIndex = 0;
@@ -935,6 +937,7 @@ let matchedPairs = 0;
 let matchAttempts = 0;
 
 function startMatchMode(deckId, cards) {
+    // Reset all state variables
     matchCards = JSON.parse(JSON.stringify(cards));
     matchDeckId = deckId;
     matchSelected = [];
@@ -1002,7 +1005,7 @@ function selectMatchCard(idx, id, type) {
             
             if (matchedPairs === matchCards.length) {
                 setTimeout(() => {
-                    finishStudySession('Match', matchCards.length - Math.floor(matchAttempts / 2), matchCards.length);
+                    finishStudySession('Match', matchedPairs, matchCards.length);
                 }, 500);
             }
         } else {
@@ -1019,10 +1022,12 @@ function selectMatchCard(idx, id, type) {
 }
 
 async function finishStudySession(mode, score, total) {
+    const currentDeckId = studyDeckId || quizDeckId || matchDeckId;
+    
     const data = await apiCall('/StudySessions', {
         method: 'POST',
         body: JSON.stringify({
-            deckId: studyDeckId || quizDeckId || matchDeckId,
+            deckId: currentDeckId,
             mode: mode,
             score: score,
             totalCards: total
@@ -1044,13 +1049,45 @@ async function finishStudySession(mode, score, total) {
         `;
         
         openModal('Study Results', message, [
-            { text: 'View Leaderboard', class: 'btn-warning', onclick: `showLeaderboard('${studyDeckId || quizDeckId || matchDeckId}')` },
-            { text: 'Study Again', class: 'btn-primary', onclick: `closeModal(); navigate('/study/${studyDeckId || quizDeckId || matchDeckId}')` },
-            { text: 'Go to Dashboard', class: 'btn-secondary',onclick: `closeModal(); navigate('/dashboard')` }
+            { text: 'View Leaderboard', class: 'btn-warning', onclick: `showLeaderboard('${currentDeckId}')` },
+            { text: 'Study Again', class: 'btn-primary', onclick: `restartStudySession('${currentDeckId}')` },
+            { text: 'Go to Dashboard', class: 'btn-secondary', onclick: `closeModal(); navigate('/dashboard')` }
         ]);
     }
 }
 
+// New function to restart study session and clear the study area
+function restartStudySession(deckId) {
+    closeModal();
+    
+    // Clear all game state variables
+    currentCardIndex = 0;
+    studyCards = [];
+    studyDeckId = '';
+    currentQuizIndex = 0;
+    quizScore = 0;
+    selectedAnswer = null;
+    quizCards = [];
+    quizDeckId = '';
+    matchCards = [];
+    matchDeckId = '';
+    matchSelected = [];
+    matchedPairs = 0;
+    matchAttempts = 0;
+    
+    // Clear the study area completely
+    const studyArea = document.getElementById('studyArea');
+    if (studyArea) {
+        studyArea.innerHTML = '';
+    }
+    
+    // Small delay to ensure clean state, then navigate
+    setTimeout(() => {
+        navigate(`/study/${deckId}`);
+    }, 100);
+}
+
+// Alternative: Add a function to show leaderboard
 async function showLeaderboard(deckId) {
     const leaderboard = await apiCall(`/StudySessions/leaderboard/${deckId}`);
     

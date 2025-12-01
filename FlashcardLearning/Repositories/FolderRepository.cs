@@ -40,7 +40,7 @@ public class FolderRepository : Repository<Folder>, IFolderRepository
             .OrderByDescending(f => f.CreatedAt)
             .ToListAsync();
     }
-
+    
     public async Task<Folder?> GetFolderByNameAsync(string name, Guid userId)
     {
         return await _dbSet

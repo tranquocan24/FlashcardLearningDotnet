@@ -575,7 +575,7 @@ function showCreateFlashcardModal(deckId) {
         </div>
         <div class="form-group">
             <label>Definition (Vietnamese) *</label>
-            <input type="text" id="cardDefinition" placeholder="e.g. Xin chào">
+            <input type="text" id="cardDefinition" >
         </div>
         <div class="form-group">
             <label>Example</label>

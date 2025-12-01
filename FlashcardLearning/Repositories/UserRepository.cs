@@ -31,12 +31,11 @@ public class UserRepository : Repository<User>, IUserRepository
 
     public async Task<bool> ChangePasswordAsync(Guid userId, string newPasswordHash)
     {
-        var user = await _dbSet.FindAsync(userId);
+        var user = await GetByIdAsync(userId);
         if (user == null)
         {
             return false;
         }
-
         user.Password = newPasswordHash;
         await _context.SaveChangesAsync();
         return true;

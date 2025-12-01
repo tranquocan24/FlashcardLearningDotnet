@@ -141,22 +141,22 @@
         <h1>?? Test Translation API</h1>
         
         <div class="alert alert-warning" id="loginAlert" style="display:none;">
-            <strong>?? Ch?a ??ng nh?p!</strong> Vui lòng <a href="/index.html">??ng nh?p</a> tr??c khi test.
+            <strong>?? Ch?a ??ng nh?p!</strong> Vui lï¿½ng <a href="/index.html">??ng nh?p</a> tr??c khi test.
         </div>
         
         <div class="alert alert-info">
             <strong>?? H??ng d?n:</strong>
             <ol style="margin: 10px 0 0 20px;">
-                <li>??ng nh?p vào h? th?ng (n?u ch?a)</li>
-                <li>Nh?p t? ti?ng Anh vào ô bên d??i</li>
+                <li>??ng nh?p vï¿½o h? th?ng (n?u ch?a)</li>
+                <li>Nh?p t? ti?ng Anh vï¿½o ï¿½ bï¿½n d??i</li>
                 <li>Click "Test API" ?? ki?m tra</li>
-                <li>Xem k?t qu? và response t? server</li>
+                <li>Xem k?t qu? vï¿½ response t? server</li>
             </ol>
         </div>
         
         <div class="form-group">
             <label>T? ti?ng Anh:</label>
-            <input type="text" id="wordInput" placeholder="Ví d?: dog, hello, computer..." value="dog">
+            <input type="text" id="wordInput" placeholder="Vï¿½ d?: dog, hello, computer..." value="dog">
             
             <div class="test-words">
                 <div class="test-word" onclick="fillWord('dog')">dog</div>
@@ -200,14 +200,14 @@
             const loadingDiv = document.getElementById('loading');
             
             if (!word) {
-                showResult('error', '? L?i', 'Vui lòng nh?p t? c?n tra!');
+                showResult('error', '? L?i', 'Vui lï¿½ng nh?p t? c?n tra!');
                 return;
             }
             
             // Check token
             const token = localStorage.getItem('token');
             if (!token) {
-                showResult('error', '? L?i', 'B?n ch?a ??ng nh?p! Vui lòng <a href="/index.html">??ng nh?p</a> tr??c.');
+                showResult('error', '? L?i', 'B?n ch?a ??ng nh?p! Vui lï¿½ng <a href="/index.html">??ng nh?p</a> tr??c.');
                 return;
             }
             
@@ -244,7 +244,7 @@
                 const data = await response.json();
                 
                 if (data && data.success) {
-                    showResult('success', '? Thành công!', `
+                    showResult('success', '? Thï¿½nh cï¿½ng!', `
                         <p><strong>T?:</strong> ${data.word}</p>
                         <p><strong>Ngh?a:</strong> <span style="font-size: 1.2em; color: #28a745;">${data.meaning}</span></p>
                         <p><strong>Response Time:</strong> ${elapsed}ms</p>
@@ -255,8 +255,8 @@
                         </details>
                     `);
                 } else {
-                    showResult('info', '?? Không tìm th?y', `
-                        <p>Không tìm th?y ngh?a ti?ng Vi?t cho t?: <strong>${word}</strong></p>
+                    showResult('info', '?? Khï¿½ng tï¿½m th?y', `
+                        <p>Khï¿½ng tï¿½m th?y ngh?a ti?ng Vi?t cho t?: <strong>${word}</strong></p>
                         <p><strong>Response Time:</strong> ${elapsed}ms</p>
                         <details style="margin-top: 15px;">
                             <summary style="cursor: pointer; color: #007bff;">?? Raw JSON Response</summary>
@@ -269,11 +269,11 @@
                 loadingDiv.style.display = 'none';
                 showResult('error', '? Network Error', `
                     <p><strong>Message:</strong> ${error.message}</p>
-                    <p>Vui lòng ki?m tra:</p>
+                    <p>Vui lï¿½ng ki?m tra:</p>
                     <ul>
                         <li>Backend ?ang ch?y?</li>
-                        <li>URL API ?úng ch?a?</li>
-                        <li>Token còn h?p l? không?</li>
+                        <li>URL API ?ï¿½ng ch?a?</li>
+                        <li>Token cï¿½n h?p l? khï¿½ng?</li>
                     </ul>
                 `);
             }

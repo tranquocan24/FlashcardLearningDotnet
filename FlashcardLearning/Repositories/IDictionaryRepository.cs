@@ -2,7 +2,7 @@ using FlashcardLearning.Models;
 
 namespace FlashcardLearning.Repositories
 {
-    public interface IDictionaryRepository
+    public interface IDictionaryRepository : IRepository<DictionaryEntry>
     {
         Task<DictionaryEntry?> GetByWordAsync(string word);
         Task AddAsync(DictionaryEntry entry);

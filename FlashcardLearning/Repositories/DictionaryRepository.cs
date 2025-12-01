@@ -3,13 +3,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FlashcardLearning.Repositories
 {
-    public class DictionaryRepository : IDictionaryRepository
+    public class DictionaryRepository : Repository<DictionaryEntry>, IDictionaryRepository
     {
-        private readonly AppDbContext _context;
+        
 
-        public DictionaryRepository(AppDbContext context)
+        public DictionaryRepository(AppDbContext context) : base(context)
         {
-            _context = context;
         }
 
         public async Task<DictionaryEntry?> GetByWordAsync(string word)
@@ -19,7 +18,7 @@ namespace FlashcardLearning.Repositories
 
             var normalizedWord = word.Trim().ToLower();
 
-            return await _context.DictionaryEntries
+            return await _dbSet
                 .FirstOrDefaultAsync(d => d.Word == normalizedWord);
         }
         public async Task AddAsync(DictionaryEntry entry)
@@ -30,8 +29,8 @@ namespace FlashcardLearning.Repositories
             entry.Word = entry.Word.Trim().ToLower();
             entry.CachedAt = DateTime.Now;
 
-            _context.DictionaryEntries.Add(entry);
-            await _context.SaveChangesAsync();
+            _dbSet.Add(entry);
+            await SaveChangesAsync();
         }
 
         public async Task<bool> ExistsAsync(string word)
@@ -41,7 +40,7 @@ namespace FlashcardLearning.Repositories
 
             var normalizedWord = word.Trim().ToLower();
 
-            return await _context.DictionaryEntries
+            return await _dbSet
                 .AnyAsync(d => d.Word == normalizedWord);
         }
     }

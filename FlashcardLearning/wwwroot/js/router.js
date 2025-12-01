@@ -1435,6 +1435,7 @@ async function renderAdmin() {
         <div class="card">
             <div class="card-header">
                 <h3>User Management</h3>
+                <button class="btn btn-primary btn-sm" onclick="showAdminUpdateUserModal()">Update User</button>
             </div>
             ${!users || users.length === 0 ? 
                 renderEmptyState('No users', '') :
@@ -1442,6 +1443,7 @@ async function renderAdmin() {
                     <table>
                         <thead>
                             <tr>
+                                <th>ID</th>
                                 <th>Username</th>
                                 <th>Email</th>
                                 <th>Role</th>
@@ -1452,11 +1454,13 @@ async function renderAdmin() {
                         <tbody>
                             ${users.map(u => `
                                 <tr>
+                                    <td><code style="font-size:0.75rem;">${u.id}</code></td>
                                     <td>${u.username}</td>
                                     <td>${u.email}</td>
                                     <td><span class="badge badge-primary">${u.role}</span></td>
                                     <td>${formatDate(u.createdAt)}</td>
                                     <td>
+                                        <button class="btn btn-sm btn-warning" onclick="showQuickUpdateModal('${u.email}')">Edit</button>
                                         <button class="btn btn-sm btn-danger" onclick="deleteUser('${u.id}')">Delete</button>
                                     </td>
                                 </tr>
@@ -1508,28 +1512,96 @@ async function renderAdmin() {
     document.getElementById('app').innerHTML = renderLayout(content);
 }
 
+// Show modal ?? Admin update user (form ??y ??)
+function showAdminUpdateUserModal() {
+    const modalContent = `
+        <div class="form-group">
+            <label>Current Email *</label>
+            <input type="email" id="adminCurrentEmail" placeholder="user@example.com">
+            <small class="text-muted">Email c?a user c?n c?p nh?t</small>
+        </div>
+        <div class="form-group">
+            <label>New Email (optional)</label>
+            <input type="email" id="adminNewEmail" placeholder="newemail@example.com">
+            <small class="text-muted">?? tr?ng n?u không ??i email</small>
+        </div>
+        <div class="form-group">
+            <label>New Password (optional)</label>
+            <input type="password" id="adminNewPassword" placeholder="New password">
+            <small class="text-muted">?? tr?ng n?u không ??i m?t kh?u</small>
+        </div>
+    `;
+    
+    openModal('Admin: Update User', modalContent, [
+        { text: 'Cancel', class: 'btn-secondary', onclick: 'closeModal()' },
+        { text: 'Update', class: 'btn-primary', onclick: 'adminUpdateUser()' }
+    ]);
+}
+
+// Quick update modal khi b?m Edit t? b?ng (t? ??ng ?i?n email)
+function showQuickUpdateModal(currentEmail) {
+    const modalContent = `
+        <div class="form-group">
+            <label>Current Email</label>
+            <input type="email" id="adminCurrentEmail" value="${currentEmail}" readonly>
+        </div>
+        <div class="form-group">
+            <label>New Email (optional)</label>
+            <input type="email" id="adminNewEmail" placeholder="newemail@example.com">
+        </div>
+        <div class="form-group">
+            <label>New Password (optional)</label>
+            <input type="password" id="adminNewPassword" placeholder="New password">
+            
+        </div>
+    `;
+    
+    openModal('Edit User: ' + currentEmail, modalContent, [
+        { text: 'Cancel', class: 'btn-secondary', onclick: 'closeModal()' },
+        { text: 'Update', class: 'btn-warning', onclick: 'adminUpdateUser()' }
+    ]);
+}
+
+async function adminUpdateUser() {
+    const currentEmail = document.getElementById('adminCurrentEmail').value.trim();
+    const newEmail = document.getElementById('adminNewEmail').value.trim();
+    const newPassword = document.getElementById('adminNewPassword').value.trim();
+    
+    if (!currentEmail) {
+        showAlert('Please enter current email', 'error');
+        return;
+    }
+    
+    if (!newEmail && !newPassword) {
+        showAlert('Please enter at least New Email or New Password', 'error');
+        return;
+    }
+    
+    const data = await apiCall('/Users/admin/update-user', {
+        method: 'PUT',
+        body: JSON.stringify({ 
+            email: currentEmail, 
+            newEmail: newEmail || null, 
+            newPassword: newPassword || null 
+        })
+    });
+    
+    if (data) {
+        showAlert('User updated successfully!', 'success');
+        closeModal();
+        renderAdmin();
+    }
+}
+
 async function deleteUser(userId) {
-    if (!confirm('Are you sure you want to delete this user?')) return;
+    if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
     
     const data = await apiCall(`/Users/${userId}`, {
         method: 'DELETE'
     });
     
-    if (data) {
+    if (data !== null) {
         showAlert('User deleted successfully!', 'success');
-        renderAdmin();
-    }
-}
-
-async function deleteSession(sessionId) {
-    if (!confirm('Are you sure you want to delete this session?')) return;
-    
-    const data = await apiCall(`/StudySessions/admin/${sessionId}`, {
-        method: 'DELETE'
-    });
-    
-    if (data) {
-        showAlert('Session deleted successfully!', 'success');
         renderAdmin();
     }
 }
@@ -1571,6 +1643,7 @@ function renderLayout(content) {
                 </ul>
                 <div style="position: absolute; bottom: 20px; left: 20px; right: 20px; font-size: 0.75rem; opacity: 0.5; text-align: center;">
                     <a href="/guide.html" target="_blank" style="color: white;">Guide</a> | 
+                    ${isAdmin ? `<a href="/admin-guide.html" target="_blank" style="color: #ffc107;">Admin Guide</a> | ` : ''}
                     <a href="/test-api.html" target="_blank" style="color: white;">API Test</a>
                 </div>
             </aside>

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin API Test - Flashcard Learning</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        h1 { color: #4257b2; margin-bottom: 10px; }
+        h2 { color: #2c3e50; margin-top: 30px; margin-bottom: 15px; border-bottom: 2px solid #e9ecef; padding-bottom: 10px; }
+        .test-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: 600;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+        button {
+            padding: 12px 24px;
+            background: #4257b2;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: all 0.2s;
+        }
+        button:hover { background: #364999; transform: translateY(-2px); }
+        button.danger { background: #dc3545; }
+        button.danger:hover { background: #c82333; }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background: #e8f5e9;
+            border-left: 4px solid #28a745;
+            border-radius: 6px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 0.85rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+        code {
+            background: #f4f6f8;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            color: #e83e8c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>?? Admin API Test Tool</h1>
+        <p style="color: #6c757d; margin-bottom: 20px;">Test các API Admin c?a Flashcard Learning Backend</p>
+
+        <div class="test-section">
+            <h3>?? JWT Token</h3>
+            <label>Paste Token c?a Admin vào ?ây:</label>
+            <textarea id="tokenInput" rows="3" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."></textarea>
+            <button onclick="saveToken()">Save Token</button>
+            <div id="tokenInfo" style="margin-top: 10px; font-size: 0.85rem; color: #6c757d;"></div>
+        </div>
+
+        <h2>1?? Get All Users</h2>
+        <div class="test-section">
+            <p><strong>Endpoint:</strong> <code>GET /api/Users</code></p>
+            <button onclick="getAllUsers()">Get All Users</button>
+            <div id="usersResult"></div>
+        </div>
+
+        <h2>2?? Admin Update User</h2>
+        <div class="test-section">
+            <p><strong>Endpoint:</strong> <code>PUT /api/Users/admin/update-user</code></p>
+            <label>Current Email:</label>
+            <input type="email" id="updateEmail" placeholder="user@example.com">
+            <label>New Email (optional):</label>
+            <input type="email" id="updateNewEmail" placeholder="newuser@example.com">
+            <label>New Password (optional):</label>
+            <input type="password" id="updateNewPassword" placeholder="newpassword123">
+            <button onclick="updateUser()">Update User</button>
+            <div id="updateResult"></div>
+        </div>
+
+        <h2>3?? Delete User</h2>
+        <div class="test-section">
+            <p><strong>Endpoint:</strong> <code>DELETE /api/Users/{id}</code></p>
+            <label>User ID:</label>
+            <input type="text" id="deleteUserId" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+            <button class="danger" onclick="deleteUser()">Delete User</button>
+            <div id="deleteResult"></div>
+        </div>
+
+        <h2>4?? Get All Study Sessions (Admin)</h2>
+        <div class="test-section">
+            <p><strong>Endpoint:</strong> <code>GET /api/StudySessions/admin/all-history</code></p>
+            <button onclick="getAllSessions()">Get All Sessions</button>
+            <div id="sessionsResult"></div>
+        </div>
+
+        <h2>5?? Delete Study Session</h2>
+        <div class="test-section">
+            <p><strong>Endpoint:</strong> <code>DELETE /api/StudySessions/admin/{id}</code></p>
+            <label>Session ID:</label>
+            <input type="text" id="deleteSessionId" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+            <button class="danger" onclick="deleteSession()">Delete Session</button>
+            <div id="deleteSessionResult"></div>
+        </div>
+
+        <hr style="margin: 40px 0; border: none; border-top: 2px solid #e9ecef;">
+        <p style="text-align: center; color: #6c757d;">
+            <a href="/" style="color: #4257b2; text-decoration: none;">? Quay l?i Trang Ch?</a> | 
+            <a href="/admin-guide.html" style="color: #28a745; text-decoration: none;">?? Admin Guide</a>
+        </p>
+    </div>
+
+    <script>
+        const API_URL = '/api';
+        let token = localStorage.getItem('adminTestToken') || '';
+
+        if (token) {
+            document.getElementById('tokenInput').value = token;
+            displayTokenInfo(token);
+        }
+
+        function saveToken() {
+            token = document.getElementById('tokenInput').value.trim();
+            localStorage.setItem('adminTestToken', token);
+            displayTokenInfo(token);
+            showResult('tokenInfo', 'Token saved!', false);
+        }
+
+        function displayTokenInfo(token) {
+            try {
+                const decoded = parseJWT(token);
+                document.getElementById('tokenInfo').innerHTML = `
+                    ? Token Valid | User: <strong>${decoded.unique_name || decoded.sub}</strong> | 
+                    Role: <strong>${decoded.role}</strong> | 
+                    Exp: ${new Date(decoded.exp * 1000).toLocaleString()}
+                `;
+            } catch {
+                document.getElementById('tokenInfo').innerHTML = '? Invalid Token';
+            }
+        }
+
+        function parseJWT(token) {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => 
+                '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+            ).join(''));
+            return JSON.parse(jsonPayload);
+        }
+
+        async function apiCall(endpoint, options = {}) {
+            if (!token) {
+                alert('Please save token first!');
+                return;
+            }
+
+            try {
+                const response = await fetch(API_URL + endpoint, {
+                    ...options,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                        ...options.headers
+                    }
+                });
+
+                if (response.status === 204) {
+                    return { success: true, message: 'Success (No Content)' };
+                }
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(JSON.stringify(data, null, 2));
+                }
+
+                return data;
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        function showResult(elementId, data, isError = false) {
+            const resultDiv = document.getElementById(elementId);
+            resultDiv.className = isError ? 'result error' : 'result';
+            resultDiv.textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+        }
+
+        async function getAllUsers() {
+            try {
+                const data = await apiCall('/Users');
+                showResult('usersResult', data);
+            } catch (error) {
+                showResult('usersResult', error.message, true);
+            }
+        }
+
+        async function updateUser() {
+            const email = document.getElementById('updateEmail').value.trim();
+            const newEmail = document.getElementById('updateNewEmail').value.trim();
+            const newPassword = document.getElementById('updateNewPassword').value.trim();
+
+            if (!email) {
+                alert('Please enter current email!');
+                return;
+            }
+
+            if (!newEmail && !newPassword) {
+                alert('Please enter at least New Email or New Password!');
+                return;
+            }
+
+            try {
+                const data = await apiCall('/Users/admin/update-user', {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        email,
+                        newEmail: newEmail || null,
+                        newPassword: newPassword || null
+                    })
+                });
+                showResult('updateResult', data);
+            } catch (error) {
+                showResult('updateResult', error.message, true);
+            }
+        }
+
+        async function deleteUser() {
+            const userId = document.getElementById('deleteUserId').value.trim();
+
+            if (!userId) {
+                alert('Please enter User ID!');
+                return;
+            }
+
+            if (!confirm('Are you sure you want to delete this user?')) {
+                return;
+            }
+
+            try {
+                const data = await apiCall(`/Users/${userId}`, {
+                    method: 'DELETE'
+                });
+                showResult('deleteResult', data);
+            } catch (error) {
+                showResult('deleteResult', error.message, true);
+            }
+        }
+
+        async function getAllSessions() {
+            try {
+                const data = await apiCall('/StudySessions/admin/all-history');
+                showResult('sessionsResult', data);
+            } catch (error) {
+                showResult('sessionsResult', error.message, true);
+            }
+        }
+
+        async function deleteSession() {
+            const sessionId = document.getElementById('deleteSessionId').value.trim();
+
+            if (!sessionId) {
+                alert('Please enter Session ID!');
+                return;
+            }
+
+            if (!confirm('Are you sure you want to delete this session?')) {
+                return;
+            }
+
+            try {
+                const data = await apiCall(`/StudySessions/admin/${sessionId}`, {
+                    method: 'DELETE'
+                });
+                showResult('deleteSessionResult', data);
+            } catch (error) {
+                showResult('deleteSessionResult', error.message, true);
+            }
+        }
+    </script>
+</body>
+</html>

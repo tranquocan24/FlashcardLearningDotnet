@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Guide - Flashcard Learning</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #4257b2;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        h2 {
+            color: #2c3e50;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        h3 {
+            color: #495057;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        p {
+            margin-bottom: 15px;
+            color: #555;
+        }
+        code {
+            background: #f4f6f8;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #e83e8c;
+            font-size: 0.9rem;
+        }
+        .endpoint {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #28a745;
+        }
+        .endpoint strong {
+            color: #28a745;
+        }
+        .warning {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #ffc107;
+        }
+        .feature-list {
+            margin: 20px 0;
+        }
+        .feature-list li {
+            margin: 10px 0;
+            padding-left: 10px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #4257b2;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            margin-top: 20px;
+            transition: all 0.2s;
+        }
+        .btn:hover {
+            background: #364999;
+            transform: translateY(-2px);
+        }
+        .screenshot {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            margin: 20px 0;
+        }
+        ul {
+            margin-left: 30px;
+        }
+        ol {
+            margin-left: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>?? Admin Panel Guide</h1>
+        <p style="color: #6c757d; font-size: 1.1rem;">H??ng d?n s? d?ng ch?c n?ng qu?n l� Admin trong Flashcard Learning</p>
+
+        <h2>?? 1. Quy?n Truy C?p</h2>
+        <p>Trang Admin Panel ch? hi?n th? cho t�i kho?n c� <code>Role = "Admin"</code>. N?u b?n kh�ng ph?i Admin, h? th?ng s? t? ??ng chuy?n h??ng v? Dashboard.</p>
+        
+        <div class="warning">
+            <strong>?? L?u �:</strong> Token JWT ph?i ch?a Claim <code>Role = "Admin"</code>. H�y ki?m tra token c?a b?n tr??c khi th? nghi?m.
+        </div>
+
+        <h2>??? 2. C�c T�nh N?ng Admin</h2>
+        
+        <h3>2.1. User Management (Qu?n l� ng??i d�ng)</h3>
+        <ul class="feature-list">
+            <li><strong>Xem danh s�ch ng??i d�ng:</strong> Hi?n th? to�n b? user trong h? th?ng (ID, Username, Email, Role, Created Date)</li>
+            <li><strong>C?p nh?t th�ng tin User:</strong> S?a Email v� Password c?a ng??i kh�c</li>
+            <li><strong>X�a User:</strong> X�a t�i kho?n ng??i d�ng (kh�ng th? x�a ch�nh m�nh)</li>
+        </ul>
+
+        <h3>2.2. Study History Management</h3>
+        <ul class="feature-list">
+            <li><strong>Xem l?ch s? h?c t?p to�n h? th?ng:</strong> Theo d�i t?t c? Study Sessions c?a m?i ng??i</li>
+            <li><strong>X�a Study Session:</strong> X�a c�c session kh�ng h?p l? ho?c spam</li>
+        </ul>
+
+        <h2>?? 3. API Backend Endpoints</h2>
+
+        <div class="endpoint">
+            <strong>GET</strong> <code>/api/Users</code><br>
+            <strong>M� t?:</strong> L?y danh s�ch to�n b? users<br>
+            <strong>Y�u c?u:</strong> Header <code>Authorization: Bearer &lt;token&gt;</code> (Role = Admin)
+        </div>
+
+        <div class="endpoint">
+            <strong>PUT</strong> <code>/api/Users/admin/update-user</code><br>
+            <strong>Body:</strong>
+            <pre style="background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 6px; overflow-x: auto; margin-top: 10px;">
+{
+    "email": "currentuser@example.com",
+    "newEmail": "newuser@example.com",
+    "newPassword": "newpassword123"
+}</pre>
+            <strong>M� t?:</strong> C?p nh?t Email v�/ho?c Password c?a user kh�c<br>
+            <strong>L?u �:</strong> C� th? ?? <code>null</code> n?u kh�ng mu?n ??i Email ho?c Password
+        </div>
+
+        <div class="endpoint">
+            <strong>DELETE</strong> <code>/api/Users/{id}</code><br>
+            <strong>M� t?:</strong> X�a user theo ID<br>
+            <strong>Y�u c?u:</strong> Kh�ng th? x�a ch�nh m�nh
+        </div>
+
+        <div class="endpoint">
+            <strong>GET</strong> <code>/api/StudySessions/admin/all-history</code><br>
+            <strong>M� t?:</strong> L?y to�n b? l?ch s? h?c t?p c?a h? th?ng
+        </div>
+
+        <div class="endpoint">
+            <strong>DELETE</strong> <code>/api/StudySessions/admin/{id}</code><br>
+            <strong>M� t?:</strong> X�a m?t Study Session
+        </div>
+
+        <h2>?? 4. Giao Di?n Frontend</h2>
+        
+        <h3>4.1. V? tr� Menu</h3>
+        <p>N?u b?n l� Admin, menu <strong>"Admin Panel"</strong> s? xu?t hi?n tr�n Sidebar (d??i "Profile").</p>
+
+        <h3>4.2. B?ng User Management</h3>
+        <ul>
+            <li><strong>C?t ID:</strong> Hi?n th? d??i d?ng <code>&lt;code&gt;</code> tag v?i font monospace</li>
+            <li><strong>N�t "Edit":</strong> M? modal ?? c?p nh?t Email/Password</li>
+            <li><strong>N�t "Delete":</strong> X�a user (c� confirm dialog)</li>
+            <li><strong>N�t "Update User":</strong> ? g�c tr�n ph?i, cho ph�p nh?p email th? c�ng ?? c?p nh?t</li>
+        </ul>
+
+        <h3>4.3. Modal Update User</h3>
+        <p>C� 2 c�ch m? modal:</p>
+        <ol>
+            <li><strong>B?m "Update User":</strong> Form tr?ng, nh?p email th? c�ng</li>
+            <li><strong>B?m "Edit" ? h�ng user:</strong> Form t? ??ng ?i?n email c?a user ?�</li>
+        </ol>
+
+        <div class="warning">
+            <strong>?? Tip:</strong> N?u ch? mu?n ??i Password, h�y ?? tr?ng � "New Email". T??ng t?, ch? ??i Email th� ?? tr?ng "New Password".
+        </div>
+
+        <h2>?? 5. H??ng D?n Test</h2>
+        
+        <h3>B??c 1: ??ng nh?p v?i t�i kho?n Admin</h3>
+        <p>??m b?o token JWT ch?a claim <code>"role": "Admin"</code>. B?n c� th? decode token t?i <a href="https://jwt.io" target="_blank">jwt.io</a></p>
+
+        <h3>B??c 2: V�o Admin Panel</h3>
+        <p>Click v�o menu <strong>"Admin Panel"</strong> ho?c truy c?p tr?c ti?p: <code>#/admin</code></p>
+
+        <h3>B??c 3: Test Update User</h3>
+        <ol>
+            <li>B?m n�t <strong>"Update User"</strong> (g�c tr�n b�n ph?i b?ng)</li>
+            <li>Nh?p email c?a user c?n s?a (v� d?: <code>user@test.com</code>)</li>
+            <li>Nh?p New Email ho?c New Password (ho?c c? 2)</li>
+            <li>B?m <strong>"Update"</strong></li>
+            <li>Ki?m tra th�ng b�o th�nh c�ng</li>
+        </ol>
+
+        <h3>B??c 4: Test Delete User</h3>
+        <ol>
+            <li>Ch?n user mu?n x�a (kh�ng ph?i t�i kho?n Admin ?ang ??ng nh?p)</li>
+            <li>B?m n�t <strong>"Delete"</strong> m�u ??</li>
+            <li>X�c nh?n trong dialog</li>
+            <li>User s? b? x�a kh?i danh s�ch</li>
+        </ol>
+
+        <h2>?? 6. C�c L?i Th??ng G?p</h2>
+        
+        <h3>? "You do not have permission to access this page"</h3>
+        <p><strong>Nguy�n nh�n:</strong> Token kh�ng c� quy?n Admin ho?c ?� h?t h?n.</p>
+        <p><strong>Gi?i ph�p:</strong> ??ng nh?p l?i v?i t�i kho?n Admin.</p>
+
+        <h3>? "User with this email does not exist"</h3>
+        <p><strong>Nguy�n nh�n:</strong> Email nh?p v�o kh�ng t?n t?i trong DB.</p>
+        <p><strong>Gi?i ph�p:</strong> Ki?m tra l?i email ch�nh x�c t? b?ng User Management.</p>
+
+        <h3>? "You can not delete your own account"</h3>
+        <p><strong>Nguy�n nh�n:</strong> ?ang c? x�a t�i kho?n Admin ?ang ??ng nh?p.</p>
+        <p><strong>Gi?i ph�p:</strong> Ch? x�a t�i kho?n ng??i kh�c.</p>
+
+        <h2>?? 7. Code JavaScript</h2>
+        <p>C�c h�m ch�nh ???c th�m v�o <code>router.js</code>:</p>
+        <ul>
+            <li><code>showAdminUpdateUserModal()</code> - M? form Update User tr?ng</li>
+            <li><code>showQuickUpdateModal(email)</code> - M? form v?i email ?� ?i?n s?n</li>
+            <li><code>adminUpdateUser()</code> - G?i API PUT ?? c?p nh?t user</li>
+            <li><code>deleteUser(userId)</code> - G?i API DELETE ?? x�a user</li>
+        </ul>
+
+        <h2>?? 8. K?t Lu?n</h2>
+        <p>H? th?ng Admin Panel ?� ???c t�ch h?p ??y ?? v?i:</p>
+        <ul class="feature-list">
+            <li>? Ki?m tra quy?n Admin t? ??ng (d?a v�o JWT Token)</li>
+            <li>? Giao di?n Modal hi?n ??i, kh�ng c?n trang ri�ng bi?t</li>
+            <li>? H? tr? c?p nh?t Email v� Password ri�ng l? ho?c ??ng th?i</li>
+            <li>? X�a user v?i x�c nh?n an to�n</li>
+            <li>? Qu?n l� l?ch s? h?c t?p to�n h? th?ng</li>
+        </ul>
+
+        <div style="text-align: center; margin-top: 40px;">
+            <a href="/" class="btn">Quay l?i Trang Ch?</a>
+            <a href="/test-api.html" class="btn" style="background: #28a745;">Test API</a>
+        </div>
+
+        <hr style="margin: 40px 0; border: none; border-top: 2px solid #e9ecef;">
+        
+        <p style="text-align: center; color: #6c757d; font-size: 0.9rem;">
+            � 2024 Flashcard Learning | Developed with ?? by CSW 306 Team
+        </p>
+    </div>
+</body>
+</html>

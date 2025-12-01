@@ -640,6 +640,26 @@ tbody tr:hover {
     background: #f8f9fa;
 }
 
+/* Code tag for displaying IDs */
+code {
+    padding: 3px 8px;
+    background: #f4f6f8;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    color: #e83e8c;
+    word-break: break-all;
+}
+
+table code {
+    display: inline-block;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 /* ============================
    HEADER
 ============================ */
